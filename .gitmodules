@@ -1,3 +1,3 @@
 [submodule "pymavlink"]
 	path = pymavlink
-	url = git://github.com/tony2157/pymavlink.git
+	url = git://github.com/oucass/pymavlink.git
