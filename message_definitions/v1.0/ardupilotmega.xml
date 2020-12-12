@@ -27,26 +27,7 @@
     </enum>
     <!-- ardupilot specific MAV_CMD_* commands -->
     <enum name="MAV_CMD">
-      <entry value="211" name="MAV_CMD_DO_GRIPPER" hasLocation="false" isDestination="false">
-        <description>Mission command to operate EPM gripper.</description>
-        <param index="1" label="Instance" minValue="1" increment="1">Gripper instance number (from 1 to max number of grippers on the vehicle).</param>
-        <param index="2" label="Action" enum="GRIPPER_ACTIONS">Gripper action.</param>
-        <param index="3">Empty.</param>
-        <param index="4">Empty.</param>
-        <param index="5">Empty.</param>
-        <param index="6">Empty.</param>
-        <param index="7">Empty.</param>
-      </entry>
-      <entry value="212" name="MAV_CMD_DO_AUTOTUNE_ENABLE" hasLocation="false" isDestination="false">
-        <description>Enable/disable autotune.</description>
-        <param index="1" label="Enable" minValue="0" maxValue="1" increment="1">Enable (1: enable, 0:disable).</param>
-        <param index="2">Empty.</param>
-        <param index="3">Empty.</param>
-        <param index="4">Empty.</param>
-        <param index="5">Empty.</param>
-        <param index="6">Empty.</param>
-        <param index="7">Empty.</param>
-      </entry>
+      <!-- 200 to 214 used by common.xml -->
       <entry value="215" name="MAV_CMD_DO_SET_RESUME_REPEAT_DIST">
         <description>Set the distance to be repeated on mission resume</description>
         <param index="1" label="Distance" units="m">Distance.</param>
@@ -129,16 +110,7 @@
         <param index="6">Empty.</param>
         <param index="7">Empty.</param>
       </entry>
-      <entry value="42006" name="MAV_CMD_FIXED_MAG_CAL_YAW">
-        <description>Magnetometer calibration based on provided known yaw. This allows for fast calibration using WMM field tables in the vehicle, given only the known yaw of the vehicle. If Latitude and longitude are both zero then use the current vehicle location.</description>
-        <param index="1" label="Yaw" units="deg">Yaw of vehicle in earth frame.</param>
-        <param index="2" label="CompassMask">CompassMask, 0 for all.</param>
-        <param index="3" label="Latitude" units="deg">Latitude.</param>
-        <param index="4" label="Longitude" units="deg">Longitude.</param>
-        <param index="5">Empty.</param>
-        <param index="6">Empty.</param>
-        <param index="7">Empty.</param>
-      </entry>
+      <!-- 42006 MAV_CMD_FIXED_MAG_CAL_YAW moved to common.xml -->
       <entry value="42424" name="MAV_CMD_DO_START_MAG_CAL" hasLocation="false" isDestination="false">
         <description>Initiate a magnetometer calibration.</description>
         <param index="1" label="Magnetometers Bitmask" minValue="0" maxValue="255" increment="1">Bitmask of magnetometers to calibrate. Use 0 to calibrate all sensors that can be started (sensors may not start if disabled, unhealthy, etc.). The command will NACK if calibration does not start for a sensor explicitly specified by the bitmask.</param>
@@ -239,16 +211,7 @@
         <param index="6">Magic number.</param>
         <param index="7">Magic number.</param>
       </entry>
-      <entry value="42600" name="MAV_CMD_DO_WINCH" hasLocation="false" isDestination="false">
-        <description>Command to operate winch.</description>
-        <param index="1" label="Instance" minValue="0" increment="1">Winch instance number (0 for the default winch, otherwise a number from 1 to max number of winches on the vehicle).</param>
-        <param index="2" label="Action" enum="WINCH_ACTIONS">Action.</param>
-        <param index="3" label="Length" units="m">Release length (cable distance to unwind, negative numbers to wind in cable).</param>
-        <param index="4" label="Rate" units="m/s">Release rate.</param>
-        <param index="5">Empty.</param>
-        <param index="6">Empty.</param>
-        <param index="7">Empty.</param>
-      </entry>
+      <!-- 42600 used by common.xml -->
       <entry value="42650" name="MAV_CMD_FLASH_BOOTLOADER" hasLocation="false" isDestination="false">
         <description>Update the bootloader</description>
         <param index="1">Empty</param>
@@ -358,29 +321,6 @@
       </entry>
       <entry value="2" name="LAND_IMMEDIATELY">
         <description>Flag set when plane is to immediately descend to break altitude and land without GCS intervention. Flag not set when plane is to loiter at Rally point until commanded to land.</description>
-      </entry>
-    </enum>
-    <!-- gripper action enum -->
-    <enum name="GRIPPER_ACTIONS">
-      <description>Gripper actions.</description>
-      <entry value="0" name="GRIPPER_ACTION_RELEASE">
-        <description>Gripper release cargo.</description>
-      </entry>
-      <entry value="1" name="GRIPPER_ACTION_GRAB">
-        <description>Gripper grab onto cargo.</description>
-      </entry>
-    </enum>
-    <!-- Winch action enum -->
-    <enum name="WINCH_ACTIONS">
-      <description>Winch actions.</description>
-      <entry value="0" name="WINCH_RELAXED">
-        <description>Relax winch.</description>
-      </entry>
-      <entry value="1" name="WINCH_RELATIVE_LENGTH_CONTROL">
-        <description>Winch unwinds or winds specified length of cable optionally using specified rate.</description>
-      </entry>
-      <entry value="2" name="WINCH_RATE_CONTROL">
-        <description>Winch unwinds or winds cable at specified rate in meters/seconds.</description>
       </entry>
     </enum>
     <!-- Camera event types -->
