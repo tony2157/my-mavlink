@@ -17,5 +17,12 @@
   <include>test.xml</include>
   <include>ualberta.xml</include>
   <include>uAvionix.xml</include>
+  <!-- external dialects -->
+  <!-- storm32.xml range of IDs:
+    messages: 60000 - 60049
+    commands: 60000 - 60049
+  -->
+  <!-- storm32.xml: error: [Errno 2] No such file or directory: u'/home/pbarker/rc/pymavlink/external/dialects/storm32.xml' when building using MDEF=$HOME/rc/ardupilot/modules/mavlink/message_definitions python setup.py build install -user -force -->
+  <!-- <include>../../external/dialects/storm32.xml</include> -->
   <messages/>
 </mavlink>
