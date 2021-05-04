@@ -211,6 +211,9 @@
       <entry value="536870912" name="MAV_SYS_STATUS_OBSTACLE_AVOIDANCE">
         <description>0x20000000 Avoidance/collision prevention</description>
       </entry>
+      <entry value="1073741824" name="MAV_SYS_STATUS_SENSOR_PROPULSION">
+        <description>0x40000000 propulsion (actuator, esc, motor or propellor)</description>
+      </entry>
     </enum>
     <enum name="MAV_FRAME">
       <entry value="0" name="MAV_FRAME_GLOBAL">
@@ -290,22 +293,22 @@
       </entry>
     </enum>
     <enum name="MAVLINK_DATA_STREAM_TYPE">
-      <entry name="MAVLINK_DATA_STREAM_IMG_JPEG">
+      <entry value="0" name="MAVLINK_DATA_STREAM_IMG_JPEG">
         <description/>
       </entry>
-      <entry name="MAVLINK_DATA_STREAM_IMG_BMP">
+      <entry value="1" name="MAVLINK_DATA_STREAM_IMG_BMP">
         <description/>
       </entry>
-      <entry name="MAVLINK_DATA_STREAM_IMG_RAW8U">
+      <entry value="2" name="MAVLINK_DATA_STREAM_IMG_RAW8U">
         <description/>
       </entry>
-      <entry name="MAVLINK_DATA_STREAM_IMG_RAW32U">
+      <entry value="3" name="MAVLINK_DATA_STREAM_IMG_RAW32U">
         <description/>
       </entry>
-      <entry name="MAVLINK_DATA_STREAM_IMG_PGM">
+      <entry value="4" name="MAVLINK_DATA_STREAM_IMG_PGM">
         <description/>
       </entry>
-      <entry name="MAVLINK_DATA_STREAM_IMG_PNG">
+      <entry value="5" name="MAVLINK_DATA_STREAM_IMG_PNG">
         <description/>
       </entry>
     </enum>
@@ -1484,8 +1487,7 @@
         <param index="6" label="Longitude">Target longitude of center of circle in CIRCLE_MODE</param>
       </entry>
       <entry value="5000" name="MAV_CMD_NAV_FENCE_RETURN_POINT" hasLocation="true" isDestination="true">
-        <description>Fence return point. There can only be one fence return point.
-        </description>
+        <description>Fence return point (there can only be one such point in a geofence definition). If rally points are supported they should be used instead.</description>
         <param index="1">Reserved</param>
         <param index="2">Reserved</param>
         <param index="3">Reserved</param>
@@ -1814,31 +1816,31 @@
     </enum>
     <enum name="MAV_CMD_ACK">
       <description>ACK / NACK / ERROR values as a result of MAV_CMDs and for mission item transmission.</description>
-      <entry name="MAV_CMD_ACK_OK">
+      <entry value="0" name="MAV_CMD_ACK_OK">
         <description>Command / mission item is ok.</description>
       </entry>
-      <entry name="MAV_CMD_ACK_ERR_FAIL">
+      <entry value="1" name="MAV_CMD_ACK_ERR_FAIL">
         <description>Generic error message if none of the other reasons fails or if no detailed error reporting is implemented.</description>
       </entry>
-      <entry name="MAV_CMD_ACK_ERR_ACCESS_DENIED">
+      <entry value="2" name="MAV_CMD_ACK_ERR_ACCESS_DENIED">
         <description>The system is refusing to accept this command from this source / communication partner.</description>
       </entry>
-      <entry name="MAV_CMD_ACK_ERR_NOT_SUPPORTED">
+      <entry value="3" name="MAV_CMD_ACK_ERR_NOT_SUPPORTED">
         <description>Command or mission item is not supported, other commands would be accepted.</description>
       </entry>
-      <entry name="MAV_CMD_ACK_ERR_COORDINATE_FRAME_NOT_SUPPORTED">
+      <entry value="4" name="MAV_CMD_ACK_ERR_COORDINATE_FRAME_NOT_SUPPORTED">
         <description>The coordinate frame of this command / mission item is not supported.</description>
       </entry>
-      <entry name="MAV_CMD_ACK_ERR_COORDINATES_OUT_OF_RANGE">
+      <entry value="5" name="MAV_CMD_ACK_ERR_COORDINATES_OUT_OF_RANGE">
         <description>The coordinate frame of this command is ok, but he coordinate values exceed the safety limits of this system. This is a generic error, please use the more specific error messages below if possible.</description>
       </entry>
-      <entry name="MAV_CMD_ACK_ERR_X_LAT_OUT_OF_RANGE">
+      <entry value="6" name="MAV_CMD_ACK_ERR_X_LAT_OUT_OF_RANGE">
         <description>The X or latitude value is out of range.</description>
       </entry>
-      <entry name="MAV_CMD_ACK_ERR_Y_LON_OUT_OF_RANGE">
+      <entry value="7" name="MAV_CMD_ACK_ERR_Y_LON_OUT_OF_RANGE">
         <description>The Y or longitude value is out of range.</description>
       </entry>
-      <entry name="MAV_CMD_ACK_ERR_Z_ALT_OUT_OF_RANGE">
+      <entry value="8" name="MAV_CMD_ACK_ERR_Z_ALT_OUT_OF_RANGE">
         <description>The Z or altitude value is out of range.</description>
       </entry>
     </enum>
@@ -2900,6 +2902,51 @@
       </entry>
       <entry value="128" name="ATTITUDE_TARGET_TYPEMASK_ATTITUDE_IGNORE">
         <description>Ignore attitude</description>
+      </entry>
+    </enum>
+    <enum name="UTM_FLIGHT_STATE">
+      <description>Airborne status of UAS.</description>
+      <entry value="1" name="UTM_FLIGHT_STATE_UNKNOWN">
+        <description>The flight state can't be determined.</description>
+      </entry>
+      <entry value="2" name="UTM_FLIGHT_STATE_GROUND">
+        <description>UAS on ground.</description>
+      </entry>
+      <entry value="3" name="UTM_FLIGHT_STATE_AIRBORNE">
+        <description>UAS airborne.</description>
+      </entry>
+      <entry value="16" name="UTM_FLIGHT_STATE_EMERGENCY">
+        <description>UAS is in an emergency flight state.</description>
+      </entry>
+      <entry value="32" name="UTM_FLIGHT_STATE_NOCTRL">
+        <description>UAS has no active controls.</description>
+      </entry>
+    </enum>
+    <enum name="UTM_DATA_AVAIL_FLAGS" bitmask="true">
+      <description>Flags for the global position report.</description>
+      <entry value="1" name="UTM_DATA_AVAIL_FLAGS_TIME_VALID">
+        <description>The field time contains valid data.</description>
+      </entry>
+      <entry value="2" name="UTM_DATA_AVAIL_FLAGS_UAS_ID_AVAILABLE">
+        <description>The field uas_id contains valid data.</description>
+      </entry>
+      <entry value="4" name="UTM_DATA_AVAIL_FLAGS_POSITION_AVAILABLE">
+        <description>The fields lat, lon and h_acc contain valid data.</description>
+      </entry>
+      <entry value="8" name="UTM_DATA_AVAIL_FLAGS_ALTITUDE_AVAILABLE">
+        <description>The fields alt and v_acc contain valid data.</description>
+      </entry>
+      <entry value="16" name="UTM_DATA_AVAIL_FLAGS_RELATIVE_ALTITUDE_AVAILABLE">
+        <description>The field relative_alt contains valid data.</description>
+      </entry>
+      <entry value="32" name="UTM_DATA_AVAIL_FLAGS_HORIZONTAL_VELO_AVAILABLE">
+        <description>The fields vx and vy contain valid data.</description>
+      </entry>
+      <entry value="64" name="UTM_DATA_AVAIL_FLAGS_VERTICAL_VELO_AVAILABLE">
+        <description>The field vz contains valid data.</description>
+      </entry>
+      <entry value="128" name="UTM_DATA_AVAIL_FLAGS_NEXT_WAYPOINT_AVAILABLE">
+        <description>The fields next_lat, next_lon and next_alt contain valid data.</description>
       </entry>
     </enum>
     <enum name="PRECISION_LAND_MODE">
@@ -4070,8 +4117,8 @@
       <field type="int32_t" name="lat" units="degE7">Latitude (WGS84)</field>
       <field type="int32_t" name="lon" units="degE7">Longitude (WGS84)</field>
       <field type="int32_t" name="alt" units="mm">Altitude (MSL). Positive for up.</field>
-      <field type="uint16_t" name="eph" units="cm">GPS HDOP horizontal dilution of position. If unknown, set to: 65535</field>
-      <field type="uint16_t" name="epv" units="cm">GPS VDOP vertical dilution of position. If unknown, set to: 65535</field>
+      <field type="uint16_t" name="eph">GPS HDOP horizontal dilution of position (unitless). If unknown, set to: UINT16_MAX</field>
+      <field type="uint16_t" name="epv">GPS VDOP vertical dilution of position (unitless). If unknown, set to: UINT16_MAX</field>
       <field type="uint16_t" name="vel" units="cm/s">GPS ground speed. If unknown, set to: 65535</field>
       <field type="int16_t" name="vn" units="cm/s">GPS velocity in north direction in earth-fixed NED frame</field>
       <field type="int16_t" name="ve" units="cm/s">GPS velocity in east direction in earth-fixed NED frame</field>
@@ -4185,8 +4232,8 @@
       <field type="int32_t" name="lat" units="degE7">Latitude (WGS84)</field>
       <field type="int32_t" name="lon" units="degE7">Longitude (WGS84)</field>
       <field type="int32_t" name="alt" units="mm">Altitude (MSL). Positive for up.</field>
-      <field type="uint16_t" name="eph" units="cm">GPS HDOP horizontal dilution of position. If unknown, set to: UINT16_MAX</field>
-      <field type="uint16_t" name="epv" units="cm">GPS VDOP vertical dilution of position. If unknown, set to: UINT16_MAX</field>
+      <field type="uint16_t" name="eph">GPS HDOP horizontal dilution of position (unitless). If unknown, set to: UINT16_MAX</field>
+      <field type="uint16_t" name="epv">GPS VDOP vertical dilution of position (unitless). If unknown, set to: UINT16_MAX</field>
       <field type="uint16_t" name="vel" units="cm/s">GPS ground speed. If unknown, set to: UINT16_MAX</field>
       <field type="uint16_t" name="cog" units="cdeg">Course over ground (NOT heading, but direction of movement): 0.0..359.99 degrees. If unknown, set to: UINT16_MAX</field>
       <field type="uint8_t" name="satellites_visible">Number of satellites visible. If unknown, set to 255</field>
@@ -4194,6 +4241,11 @@
       <field type="uint32_t" name="dgps_age" units="ms">Age of DGPS info</field>
       <extensions/>
       <field type="uint16_t" name="yaw" units="cdeg">Yaw in earth frame from north. Use 0 if this GPS does not provide yaw. Use 65535 if this GPS is configured to provide yaw and is currently unable to provide it. Use 36000 for north.</field>
+      <field type="int32_t" name="alt_ellipsoid" units="mm">Altitude (above WGS84, EGM96 ellipsoid). Positive for up.</field>
+      <field type="uint32_t" name="h_acc" units="mm">Position uncertainty.</field>
+      <field type="uint32_t" name="v_acc" units="mm">Altitude uncertainty.</field>
+      <field type="uint32_t" name="vel_acc" units="mm">Speed uncertainty.</field>
+      <field type="uint32_t" name="hdg_acc" units="degE5">Heading / track uncertainty</field>
     </message>
     <message id="125" name="POWER_STATUS">
       <description>Power supply status</description>
@@ -4502,8 +4554,8 @@
       <field type="uint8_t" name="health">EFI health status</field>
       <field type="float" name="ecu_index">ECU index</field>
       <field type="float" name="rpm">RPM</field>
-      <field type="float" name="fuel_consumed" units="g">Fuel consumed</field>
-      <field type="float" name="fuel_flow" units="g/min">Fuel flow rate</field>
+      <field type="float" name="fuel_consumed" units="cm^3">Fuel consumed</field>
+      <field type="float" name="fuel_flow" units="cm^3/min">Fuel flow rate</field>
       <field type="float" name="engine_load" units="%">Engine load</field>
       <field type="float" name="throttle_position" units="%">Throttle position</field>
       <field type="float" name="spark_dwell_time" units="ms">Spark dwell time</field>
@@ -4554,8 +4606,8 @@
       <field type="int32_t" name="lat" units="degE7">Latitude (WGS84)</field>
       <field type="int32_t" name="lon" units="degE7">Longitude (WGS84)</field>
       <field type="float" name="alt" units="m">Altitude (MSL). Positive for up.</field>
-      <field type="float" name="hdop" units="m">GPS HDOP horizontal dilution of position</field>
-      <field type="float" name="vdop" units="m">GPS VDOP vertical dilution of position</field>
+      <field type="float" name="hdop">GPS HDOP horizontal dilution of position (unitless). If unknown, set to: UINT16_MAX</field>
+      <field type="float" name="vdop">GPS VDOP vertical dilution of position (unitless). If unknown, set to: UINT16_MAX</field>
       <field type="float" name="vn" units="m/s">GPS velocity in north direction in earth-fixed NED frame</field>
       <field type="float" name="ve" units="m/s">GPS velocity in east direction in earth-fixed NED frame</field>
       <field type="float" name="vd" units="m/s">GPS velocity in down direction in earth-fixed NED frame</field>
@@ -5005,6 +5057,27 @@
       <description>RPM sensor data message.</description>
       <field type="uint8_t" name="index">Index of this RPM sensor (0-indexed)</field>
       <field type="float" name="frequency" units="rpm">Indicated rate</field>
+    </message>
+    <message id="340" name="UTM_GLOBAL_POSITION">
+      <description>The global position resulting from GPS and sensor fusion.</description>
+      <field type="uint64_t" name="time" units="us">Time of applicability of position (microseconds since UNIX epoch).</field>
+      <field type="uint8_t[18]" name="uas_id">Unique UAS ID.</field>
+      <field type="int32_t" name="lat" units="degE7">Latitude (WGS84)</field>
+      <field type="int32_t" name="lon" units="degE7">Longitude (WGS84)</field>
+      <field type="int32_t" name="alt" units="mm">Altitude (WGS84)</field>
+      <field type="int32_t" name="relative_alt" units="mm">Altitude above ground</field>
+      <field type="int16_t" name="vx" units="cm/s">Ground X speed (latitude, positive north)</field>
+      <field type="int16_t" name="vy" units="cm/s">Ground Y speed (longitude, positive east)</field>
+      <field type="int16_t" name="vz" units="cm/s">Ground Z speed (altitude, positive down)</field>
+      <field type="uint16_t" name="h_acc" units="mm">Horizontal position uncertainty (standard deviation)</field>
+      <field type="uint16_t" name="v_acc" units="mm">Altitude uncertainty (standard deviation)</field>
+      <field type="uint16_t" name="vel_acc" units="cm/s">Speed uncertainty (standard deviation)</field>
+      <field type="int32_t" name="next_lat" units="degE7">Next waypoint, latitude (WGS84)</field>
+      <field type="int32_t" name="next_lon" units="degE7">Next waypoint, longitude (WGS84)</field>
+      <field type="int32_t" name="next_alt" units="mm">Next waypoint, altitude (WGS84)</field>
+      <field type="uint16_t" name="update_rate" units="cs">Time until next update. Set to 0 if unknown or in data driven mode.</field>
+      <field type="uint8_t" name="flight_state" enum="UTM_FLIGHT_STATE">Flight state</field>
+      <field type="uint8_t" name="flags" enum="UTM_DATA_AVAIL_FLAGS" display="bitmask">Bitwise OR combination of the data available flags.</field>
     </message>
     <message id="350" name="DEBUG_FLOAT_ARRAY">
       <description>Large debug/prototyping array. The message uses the maximum available payload for data. The array_id and name fields are used to discriminate between messages in code and in user interfaces (respectively). Do not use in production code.</description>
