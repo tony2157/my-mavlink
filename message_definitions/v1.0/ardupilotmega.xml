@@ -5,7 +5,7 @@
   <include>uAvionix.xml</include>
   <include>icarous.xml</include>
   <dialect>2</dialect>
-  <!-- Note that APM specific messages should use the command id range from 150 to 250, to leave plenty of room for growth of common.xml If you prototype a message here, then you should consider if it is general enough to move into common.xml later -->
+  <!-- Note that ArduPilot-specific messages should use the command id range from 150 to 250, to leave plenty of room for growth of common.xml If you prototype a message here, then you should consider if it is general enough to move into common.xml later -->
   <enums>
     <enum name="ACCELCAL_VEHICLE_POS">
       <entry value="1" name="ACCELCAL_VEHICLE_POS_LEVEL"/>
@@ -141,6 +141,16 @@
         <param index="7">Empty.</param>
       </entry>
       <!-- 42006 MAV_CMD_FIXED_MAG_CAL_YAW moved to common.xml -->
+      <entry value="42007" name="MAV_CMD_SET_EKF_SOURCE_SET" hasLocation="false" isDestination="false">
+        <description>Set EKF sensor source set.</description>
+        <param index="1" label="SourceSetId" minValue="1" maxValue="3" increment="1">Source Set Id.</param>
+        <param index="2">Empty.</param>
+        <param index="3">Empty.</param>
+        <param index="4">Empty.</param>
+        <param index="5">Empty.</param>
+        <param index="6">Empty.</param>
+        <param index="7">Empty.</param>
+      </entry>
       <entry value="42424" name="MAV_CMD_DO_START_MAG_CAL" hasLocation="false" isDestination="false">
         <description>Initiate a magnetometer calibration.</description>
         <param index="1" label="Magnetometers Bitmask" minValue="0" maxValue="255" increment="1">Bitmask of magnetometers to calibrate. Use 0 to calibrate all sensors that can be started (sensors may not start if disabled, unhealthy, etc.). The command will NACK if calibration does not start for a sensor explicitly specified by the bitmask.</param>
@@ -271,6 +281,16 @@
         <description>Control onboard scripting.</description>
         <param index="1" enum="SCRIPTING_CMD">Scripting command to execute</param>
       </entry>
+      <entry value="42702" name="MAV_CMD_NAV_SCRIPT_TIME" hasLocation="false" isDestination="false">
+        <description>Scripting command as NAV command with wait for completion.</description>
+        <param index="1" label="command">integer command number (0 to 255)</param>
+        <param index="2" label="timeout" units="s">timeout for operation in seconds. Zero means no timeout (0 to 255)</param>
+        <param index="3" label="arg1">argument1.</param>
+        <param index="4" label="arg2">argument2.</param>
+        <param index="5">Empty</param>
+        <param index="6">Empty</param>
+        <param index="7">Empty</param>
+      </entry>
       <entry value="43000" name="MAV_CMD_GUIDED_CHANGE_SPEED" hasLocation="false" isDestination="false">
         <description>Change flight speed at a given rate. This slews the vehicle at a controllable rate between it's previous speed and the new one. (affects GUIDED only. Outside GUIDED, aircraft ignores these commands. Designed for onboard companion-computer command-and-control, not normally operator/GCS control.)</description>
         <param index="1" label="speed type" enum="SPEED_TYPE">Airspeed or groundspeed.</param>
@@ -308,6 +328,12 @@
       </entry>
       <entry value="1" name="SCRIPTING_CMD_REPL_STOP">
         <description>End a REPL session.</description>
+      </entry>
+      <entry value="2" name="SCRIPTING_CMD_STOP">
+        <description>Stop execution of scripts.</description>
+      </entry>
+      <entry value="3" name="SCRIPTING_CMD_STOP_AND_RESTART">
+        <description>Stop execution of scripts and restart.</description>
       </entry>
     </enum>
     <!-- AP_Limits Enums -->
@@ -1031,6 +1057,7 @@
       <entry value="24" name="COPTER_MODE_ZIGZAG"/>
       <entry value="25" name="COPTER_MODE_SYSTEMID"/>
       <entry value="26" name="COPTER_MODE_AUTOROTATE"/>
+      <entry value="27" name="COPTER_MODE_AUTO_RTL"/>
     </enum>
     <enum name="SUB_MODE">
       <description>A mapping of sub flight modes for custom_mode field of heartbeat.</description>
@@ -1114,7 +1141,7 @@
       <field type="int16_t" name="mag_ofs_z">Magnetometer Z offset.</field>
     </message>
     <message id="152" name="MEMINFO">
-      <description>State of APM memory.</description>
+      <description>State of autopilot RAM.</description>
       <field type="uint16_t" name="brkval">Heap top.</field>
       <field type="uint16_t" name="freemem" units="bytes">Free memory.</field>
       <extensions/>
@@ -1177,12 +1204,14 @@
       <field type="uint8_t" name="save_position">If "1" it will save current trimmed position on EEPROM (just valid for NEUTRAL and LANDING).</field>
     </message>
     <message id="158" name="MOUNT_STATUS">
-      <description>Message with some status from APM to GCS about camera or antenna mount.</description>
+      <description>Message with some status from autopilot to GCS about camera or antenna mount.</description>
       <field type="uint8_t" name="target_system">System ID.</field>
       <field type="uint8_t" name="target_component">Component ID.</field>
       <field type="int32_t" name="pointing_a" units="cdeg">Pitch.</field>
       <field type="int32_t" name="pointing_b" units="cdeg">Roll.</field>
       <field type="int32_t" name="pointing_c" units="cdeg">Yaw.</field>
+      <extensions/>
+      <field type="uint8_t" name="mount_mode" enum="MAV_MOUNT_MODE">Mount operating mode.</field>
     </message>
     <!-- geo-fence messages -->
     <message id="160" name="FENCE_POINT">
@@ -1469,6 +1498,9 @@
       <field type="float" name="P">P component.</field>
       <field type="float" name="I">I component.</field>
       <field type="float" name="D">D component.</field>
+      <extensions/>
+      <field type="float" name="SRate">Slew rate.</field>
+      <field type="float" name="PDmod">P/D oscillation modifier.</field>
     </message>
     <message id="195" name="DEEPSTALL">
       <description>Deepstall path planning.</description>
@@ -1715,6 +1747,28 @@
       <field type="float" name="z" units="m"> Z position of the obstacle.</field>
       <field type="float" name="min_distance" units="m">Minimum distance the sensor can measure.</field>
       <field type="float" name="max_distance" units="m">Maximum distance the sensor can measure.</field>
+    </message>
+    <message id="11038" name="WATER_DEPTH">
+      <description>Water depth</description>
+      <field type="uint32_t" name="time_boot_ms" units="ms">Timestamp (time since system boot)</field>
+      <field type="uint8_t" name="id" instance="true">Onboard ID of the sensor</field>
+      <field type="uint8_t" name="healthy">Sensor data healthy (0=unhealthy, 1=healthy)</field>
+      <field type="int32_t" name="lat" units="degE7">Latitude</field>
+      <field type="int32_t" name="lng" units="degE7">Longitude</field>
+      <field type="float" name="alt" units="m">Altitude (MSL) of vehicle</field>
+      <field type="float" name="roll" units="rad">Roll angle</field>
+      <field type="float" name="pitch" units="rad">Pitch angle</field>
+      <field type="float" name="yaw" units="rad">Yaw angle</field>
+      <field type="float" name="distance" units="m">Distance (uncorrected)</field>
+      <field type="float" name="temperature" units="degC">Water temperature</field>
+    </message>
+    <message id="11039" name="MCU_STATUS">
+      <description>The MCU status, giving MCU temperature and voltage. The min and max voltages are to allow for detecting power supply instability.</description>
+      <field type="uint8_t" name="id" instance="true">MCU instance</field>
+      <field type="int16_t" name="MCU_temperature" units="cdegC">MCU Internal temperature</field>
+      <field type="uint16_t" name="MCU_voltage" units="mV">MCU voltage</field>
+      <field type="uint16_t" name="MCU_voltage_min" units="mV">MCU voltage minimum</field>
+      <field type="uint16_t" name="MCU_voltage_max" units="mV">MCU voltage maximum</field>
     </message>
   </messages>
 </mavlink>
