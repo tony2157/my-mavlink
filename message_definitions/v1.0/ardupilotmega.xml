@@ -1762,5 +1762,13 @@
       <field type="uint16_t" name="MCU_voltage_min" units="mV">MCU voltage minimum</field>
       <field type="uint16_t" name="MCU_voltage_max" units="mV">MCU voltage maximum</field>
     </message>
+    <!-- CASS Mavlink Message -->
+    <message id="227" name="CASS_SENSOR_RAW">
+      <description>Contains raw sensor data for CASS application.</description>
+      <field type="uint32_t" name="time_boot_ms">Timestamp (milliseconds since system boot)</field>
+      <field type="uint8_t" name="app_datatype">Data type indicating what data is being sent. 0 = iMet temp, 1 = RH, 2 = temps from RH, 3 = wind data</field>
+      <field type="uint8_t" name="app_datalength">Length of raw data array</field>      
+      <field type="float[5]" name="values">Raw data</field>  
+    </message> 
   </messages>
 </mavlink>
