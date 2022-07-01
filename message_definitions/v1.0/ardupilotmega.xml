@@ -1829,8 +1829,8 @@
     <message id="228" name="ARRC_SENSOR_RAW">
       <description>Contains raw sensor data for ARRC application.</description>
       <field type="uint32_t" name="time_boot_ms">Timestamp (milliseconds since system boot)</field>
-      <field type="uint8_t" name="app_datatype">Data type</field>
-      <field type="float" name="freq">Signal frequency Hz</field>      
+      <field type="uint16_t" name="dfreq">Desired frequency to sample MHz</field>
+      <field type="float" name="freq">Signal frequency MHz</field>      
       <field type="float" name="power">Signal power dBm</field>
     </message>
   </messages>
