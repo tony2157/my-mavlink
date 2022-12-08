@@ -1831,7 +1831,11 @@
       <field type="uint32_t" name="time_boot_ms">Timestamp (milliseconds since system boot)</field>
       <field type="uint16_t" name="dfreq">Desired frequency to sample MHz</field>
       <field type="float" name="freq">Signal frequency MHz</field>      
-      <field type="float" name="power">Signal power dBm</field>
+      <field type="float" name="pwr_c">Signal power co-pol dBm</field>
+      <field type="float" name="pwr_x">Signal power cross-pol dBm</field>
+      <field type="float" name="aux_1">Aux 1</field>
+      <field type="float" name="aux_2">Aux 2</field>
+      <field type="float" name="aux_3">Aux 3</field>
     </message>
   </messages>
 </mavlink>
