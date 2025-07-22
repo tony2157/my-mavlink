@@ -1650,6 +1650,14 @@
       <field type="float" name="rpm1">RPM Sensor1.</field>
       <field type="float" name="rpm2">RPM Sensor2.</field>
     </message>
+    <!-- BLISS Mavlink Message -->
+    <message id="227" name="CASS_SENSOR_RAW">
+      <description>Contains raw sensor data for CASS application.</description>
+      <field type="uint32_t" name="time_boot_ms">Timestamp (milliseconds since system boot)</field>
+      <field type="uint8_t" name="app_datatype">Data type indicating what data is being sent. 0 = iMet temp, 1 = RH, 2 = temps from RH, 3 = wind data</field>
+      <field type="uint8_t" name="app_datalength">Length of raw data array</field>      
+      <field type="float[5]" name="values">Raw data</field>  
+    </message>
     <!-- ardupilot specific mavlink2 messages starting at 11000-->
     <message id="11000" name="DEVICE_OP_READ">
       <description>Read registers for a device.</description>
