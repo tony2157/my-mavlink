@@ -2075,5 +2075,22 @@
       <field type="char[10]" name="name" instance="true">Name of the debug variable</field>
       <field type="char[64]" name="value">Value of the debug variable</field>
     </message>
+    <!-- CASS Mavlink Message -->
+    <message id="227" name="CASS_SENSOR_RAW">
+      <description>Contains raw sensor data for CASS application.</description>
+      <field type="uint32_t" name="time_boot_ms">Timestamp (milliseconds since system boot)</field>
+      <field type="uint8_t" name="app_datatype">Data type indicating what data is being sent. 0 = iMet temp, 1 = RH, 2 = temps from RH, 3 = wind data</field>
+      <field type="uint8_t" name="app_datalength">Length of raw data array</field>      
+      <field type="float[5]" name="values">Raw data</field>  
+    </message> 
+    <!-- ARRC Mavlink Message -->
+    <message id="228" name="ARRC_SENSOR_RAW">
+      <description>Contains raw sensor data for ARRC application.</description>
+      <field type="uint32_t" name="time_boot_ms">Timestamp (milliseconds since system boot)</field>
+      <field type="uint64_t" name="time_usec">Timestamp (since boot or Unix epoch)</field>
+      <field type="float" name="pwr_c">Pulse power copol dBm</field>
+      <field type="float" name="pwr_x">Pulse power crosspol dBm</field>
+      <field type="float" name="phi_c">Phase copol deg</field>
+      <field type="float" name="phi_x">Phase crosspol deg</field>
   </messages>
 </mavlink>
