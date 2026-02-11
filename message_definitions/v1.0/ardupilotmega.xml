@@ -2092,5 +2092,6 @@
       <field type="float" name="pwr_x">Pulse power crosspol dBm</field>
       <field type="float" name="phi_c">Phase copol deg</field>
       <field type="float" name="phi_x">Phase crosspol deg</field>
+    </message>
   </messages>
 </mavlink>
