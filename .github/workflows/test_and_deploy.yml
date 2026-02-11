@@ -27,13 +27,20 @@ jobs:
         run: |
           ./scripts/test.sh format
 
+  spell-check:
+    name: Find typos with codespell
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pipx run codespell --ignore-words-list=dependees,ned
+
   python-tests:
     name: Python ${{ matrix.python-version }} tests
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.7, 3.8, 3.9, "3.10", 3.11]
+        python-version: [3.7, 3.8, 3.9, "3.10", 3.11, 3.x]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -45,7 +52,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install future lxml
-      - name : Test Python generator
+      - name: Test Python generator
         run: |
           ./scripts/test.sh py
 
@@ -55,7 +62,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: ['12', '14'] # 15 fails for some weird reason
+        node-version: ['12', '14', 'lts/*']
     steps:
       - uses: actions/checkout@v2
         with:
@@ -70,8 +77,8 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm install
-      - name : Test mavlink
+      - run: npm install || true  # Continue even if there is no package.json. 
+      - name: Test mavlink
         run: |
           ./scripts/test.sh node
 
