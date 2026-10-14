@@ -1,0 +1,491 @@
+<?xml version="1.0"?>
+<mavlink>
+  <!-- ARRC RFSonde dialect: companion computer (onboard SDR) <-> autopilot <-> GCS.
+       Included from ardupilotmega.xml. Message ids 47000-47019 and MAV_CMD ids 47000-47009 are reserved for ARRC.
+       The companion computer is MAV_COMP_ID_ONBOARD_COMPUTER (191). -->
+  <dialect>2</dialect>
+  <enums>
+    <enum name="ARRC_CC_STATE">
+      <description>Companion computer mediator state.</description>
+      <entry value="0" name="ARRC_CC_STATE_BOOT"/>
+      <entry value="1" name="ARRC_CC_STATE_IDLE"/>
+      <entry value="2" name="ARRC_CC_STATE_ACTIVE"/>
+      <entry value="3" name="ARRC_CC_STATE_ERROR"/>
+      <entry value="4" name="ARRC_CC_STATE_SHUTTING_DOWN"/>
+    </enum>
+    <enum name="ARRC_CC_FLAGS" bitmask="true">
+      <description>Companion computer status flags.</description>
+      <entry value="1" name="ARRC_CC_FLAGS_FC_LINK"><description>Autopilot heartbeat received recently.</description></entry>
+      <entry value="2" name="ARRC_CC_FLAGS_GCS_SEEN"><description>GCS heartbeat received recently.</description></entry>
+      <entry value="4" name="ARRC_CC_FLAGS_TIMESYNC_OK"><description>Clock mapped to the autopilot boot clock.</description></entry>
+      <entry value="8" name="ARRC_CC_FLAGS_UTC_VALID"><description>UTC known (from SYSTEM_TIME).</description></entry>
+      <entry value="16" name="ARRC_CC_FLAGS_DISK_OK"><description>Data disk above the reserve.</description></entry>
+      <entry value="32" name="ARRC_CC_FLAGS_ENGINE_OK"><description>SDR engine process running.</description></entry>
+      <entry value="64" name="ARRC_CC_FLAGS_THERMAL_THROTTLE"><description>CPU thermal throttling.</description></entry>
+    </enum>
+    <enum name="ARRC_SDR_STATE">
+      <description>SDR engine state.</description>
+      <entry value="0" name="ARRC_SDR_STATE_OFF"><description>Device released.</description></entry>
+      <entry value="1" name="ARRC_SDR_STATE_READY"><description>Device open, not streaming.</description></entry>
+      <entry value="2" name="ARRC_SDR_STATE_RX"/>
+      <entry value="3" name="ARRC_SDR_STATE_TX"/>
+      <entry value="4" name="ARRC_SDR_STATE_RXTX"/>
+      <entry value="5" name="ARRC_SDR_STATE_ERROR"/>
+      <entry value="6" name="ARRC_SDR_STATE_RESETTING"/>
+      <entry value="7" name="ARRC_SDR_STATE_STARTING"/>
+    </enum>
+    <enum name="ARRC_SDR_FLAGS" bitmask="true">
+      <description>SDR status flags.</description>
+      <entry value="1" name="ARRC_SDR_FLAGS_DEVICE_PRESENT"><description>SDR device detected.</description></entry>
+      <entry value="2" name="ARRC_SDR_FLAGS_FPGA_LOADED"/>
+      <entry value="4" name="ARRC_SDR_FLAGS_RX_ON"/>
+      <entry value="8" name="ARRC_SDR_FLAGS_TX_ON"/>
+      <entry value="16" name="ARRC_SDR_FLAGS_TX_ARMED"/>
+      <entry value="32" name="ARRC_SDR_FLAGS_RECORDING"/>
+      <entry value="64" name="ARRC_SDR_FLAGS_REF_LOCKED"/>
+      <entry value="128" name="ARRC_SDR_FLAGS_OVERRUN"><description>Overrun in the last status period.</description></entry>
+      <entry value="256" name="ARRC_SDR_FLAGS_SATURATED"><description>ADC saturation in the last status period.</description></entry>
+      <entry value="512" name="ARRC_SDR_FLAGS_PRI_LOCKED"><description>Pulse repetition tracker locked.</description></entry>
+      <entry value="1024" name="ARRC_SDR_FLAGS_SIMULATED"><description>Simulated device (no hardware).</description></entry>
+    </enum>
+    <enum name="ARRC_SDR_MODE">
+      <description>SDR operating mode. TX shares the RX frequency, waveform and PRF.</description>
+      <entry value="0" name="ARRC_SDR_MODE_RX"/>
+      <entry value="1" name="ARRC_SDR_MODE_TX"/>
+      <entry value="2" name="ARRC_SDR_MODE_RXTX"/>
+    </enum>
+    <enum name="ARRC_CONFIG_OP">
+      <entry value="0" name="ARRC_CONFIG_OP_SET"><description>GCS request to apply this configuration.</description></entry>
+      <entry value="1" name="ARRC_CONFIG_OP_APPLIED"><description>Configuration in effect (echo or report).</description></entry>
+    </enum>
+    <enum name="ARRC_CONFIG_RESULT">
+      <entry value="0" name="ARRC_CONFIG_RESULT_ACCEPTED"/>
+      <entry value="1" name="ARRC_CONFIG_RESULT_ADJUSTED"><description>Applied with values adjusted to what the hardware supports.</description></entry>
+      <entry value="2" name="ARRC_CONFIG_RESULT_REJECTED_RANGE"/>
+      <entry value="3" name="ARRC_CONFIG_RESULT_REJECTED_BUSY"/>
+      <entry value="4" name="ARRC_CONFIG_RESULT_REJECTED_INTERLOCK"><description>Refused by a safety interlock (protected band, duty, TX role).</description></entry>
+      <entry value="5" name="ARRC_CONFIG_RESULT_FAILED"/>
+      <entry value="6" name="ARRC_CONFIG_RESULT_UNSUPPORTED"/>
+    </enum>
+    <enum name="ARRC_PORT_ID">
+      <entry value="0" name="ARRC_PORT_ID_RX1"/>
+      <entry value="1" name="ARRC_PORT_ID_RX2"/>
+      <entry value="2" name="ARRC_PORT_ID_TX1"/>
+      <entry value="3" name="ARRC_PORT_ID_TX2"/>
+    </enum>
+    <enum name="ARRC_PORT_ROLE">
+      <entry value="0" name="ARRC_PORT_ROLE_OFF"/>
+      <entry value="1" name="ARRC_PORT_ROLE_COPOL"/>
+      <entry value="2" name="ARRC_PORT_ROLE_XPOL"/>
+      <entry value="3" name="ARRC_PORT_ROLE_REF"/>
+      <entry value="4" name="ARRC_PORT_ROLE_AUX"/>
+      <entry value="10" name="ARRC_PORT_ROLE_TX_MAIN"/>
+      <entry value="11" name="ARRC_PORT_ROLE_TX_AUX"/>
+    </enum>
+    <enum name="ARRC_POLARIZATION">
+      <entry value="0" name="ARRC_POLARIZATION_UNKNOWN"/>
+      <entry value="1" name="ARRC_POLARIZATION_H"/>
+      <entry value="2" name="ARRC_POLARIZATION_V"/>
+      <entry value="3" name="ARRC_POLARIZATION_RHCP"/>
+      <entry value="4" name="ARRC_POLARIZATION_LHCP"/>
+      <entry value="5" name="ARRC_POLARIZATION_SLANT45"/>
+      <entry value="6" name="ARRC_POLARIZATION_SLANT135"/>
+    </enum>
+    <enum name="ARRC_RADAR_TX_POL">
+      <description>Transmit polarisation mode of the radar under test (session metadata).</description>
+      <entry value="0" name="ARRC_RADAR_TX_POL_UNKNOWN"/>
+      <entry value="1" name="ARRC_RADAR_TX_POL_H"/>
+      <entry value="2" name="ARRC_RADAR_TX_POL_V"/>
+      <entry value="3" name="ARRC_RADAR_TX_POL_SHV"><description>Simultaneous H and V.</description></entry>
+    </enum>
+    <enum name="ARRC_GAIN_MODE">
+      <entry value="0" name="ARRC_GAIN_MODE_MANUAL"/>
+      <entry value="1" name="ARRC_GAIN_MODE_AGC_SLOW"/>
+      <entry value="2" name="ARRC_GAIN_MODE_AGC_FAST"/>
+      <entry value="3" name="ARRC_GAIN_MODE_AGC_HYBRID"/>
+    </enum>
+    <enum name="ARRC_CLOCK_REF">
+      <entry value="0" name="ARRC_CLOCK_REF_INTERNAL"/>
+      <entry value="1" name="ARRC_CLOCK_REF_EXT_10MHZ"/>
+    </enum>
+    <enum name="ARRC_SAMPLE_FMT">
+      <entry value="0" name="ARRC_SAMPLE_FMT_SC16_Q11"/>
+      <entry value="1" name="ARRC_SAMPLE_FMT_SC8_Q7"/>
+    </enum>
+    <enum name="ARRC_TX_TRIGGER">
+      <entry value="0" name="ARRC_TX_TRIGGER_FREE_RUN"/>
+      <entry value="1" name="ARRC_TX_TRIGGER_ON_COMMAND"/>
+      <entry value="2" name="ARRC_TX_TRIGGER_PPS"/>
+    </enum>
+    <enum name="ARRC_SIGNAL_TYPE">
+      <entry value="0" name="ARRC_SIGNAL_TYPE_PULSE"/>
+      <entry value="1" name="ARRC_SIGNAL_TYPE_CW"/>
+    </enum>
+    <enum name="ARRC_DETECTOR">
+      <entry value="0" name="ARRC_DETECTOR_MF"><description>Matched filter with the waveform template.</description></entry>
+      <entry value="1" name="ARRC_DETECTOR_ENVELOPE"/>
+    </enum>
+    <enum name="ARRC_AVG_MODE">
+      <entry value="0" name="ARRC_AVG_MODE_PULSES"><description>Average N pulses.</description></entry>
+      <entry value="1" name="ARRC_AVG_MODE_SAMPLES"><description>Average N samples.</description></entry>
+      <entry value="2" name="ARRC_AVG_MODE_TIME"><description>Average over a time window.</description></entry>
+    </enum>
+    <enum name="ARRC_THRESHOLD_MODE">
+      <entry value="0" name="ARRC_THRESHOLD_MODE_FIXED_DB"><description>Fixed level in dB above the noise floor.</description></entry>
+      <entry value="1" name="ARRC_THRESHOLD_MODE_CA_CFAR"><description>Cell-averaging CFAR, threshold is the false-alarm probability.</description></entry>
+    </enum>
+    <enum name="ARRC_REC_MODE">
+      <entry value="0" name="ARRC_REC_MODE_OFF"/>
+      <entry value="1" name="ARRC_REC_MODE_GATED"/>
+    </enum>
+    <enum name="ARRC_GATE_MODE">
+      <entry value="0" name="ARRC_GATE_MODE_DETECT"><description>Gate around detected pulses only.</description></entry>
+      <entry value="1" name="ARRC_GATE_MODE_PRI_TRACK"><description>Gate at detected and predicted pulse times (tracks the PRI).</description></entry>
+      <entry value="2" name="ARRC_GATE_MODE_FIXED_PRI"><description>Gate at the configured PRF, aligned by the first detection.</description></entry>
+    </enum>
+    <enum name="ARRC_PHASE_REF">
+      <entry value="0" name="ARRC_PHASE_REF_NONE"/>
+      <entry value="1" name="ARRC_PHASE_REF_SELF"><description>Single channel, relative to the first pulse of the block (not a pattern phase).</description></entry>
+      <entry value="2" name="ARRC_PHASE_REF_COPOL"><description>Relative to the co-pol channel (differential phase).</description></entry>
+      <entry value="3" name="ARRC_PHASE_REF_REF"><description>Relative to the reference channel.</description></entry>
+    </enum>
+    <enum name="ARRC_MEAS_FLAGS" bitmask="true">
+      <entry value="1" name="ARRC_MEAS_FLAGS_VALID"/>
+      <entry value="2" name="ARRC_MEAS_FLAGS_XPOL_VALID"/>
+      <entry value="4" name="ARRC_MEAS_FLAGS_SATURATED"/>
+      <entry value="8" name="ARRC_MEAS_FLAGS_OVERRUN"/>
+      <entry value="16" name="ARRC_MEAS_FLAGS_TX_ACTIVE"/>
+      <entry value="32" name="ARRC_MEAS_FLAGS_CAL_APPLIED"/>
+      <entry value="64" name="ARRC_MEAS_FLAGS_TIMESYNC_OK"/>
+      <entry value="128" name="ARRC_MEAS_FLAGS_PARTIAL"><description>Fewer pulses or samples than configured.</description></entry>
+      <entry value="256" name="ARRC_MEAS_FLAGS_NOISE_CORRECTED"/>
+      <entry value="512" name="ARRC_MEAS_FLAGS_PREDICTED"><description>Includes predicted (undetected) pulses.</description></entry>
+      <entry value="1024" name="ARRC_MEAS_FLAGS_SIMULATED"/>
+    </enum>
+    <enum name="ARRC_TRACE_TYPE">
+      <entry value="0" name="ARRC_TRACE_TYPE_SPECTRUM"/>
+      <entry value="1" name="ARRC_TRACE_TYPE_MF_OUTPUT"/>
+      <entry value="2" name="ARRC_TRACE_TYPE_ENVELOPE"/>
+      <entry value="3" name="ARRC_TRACE_TYPE_WAVEFORM_I"/>
+      <entry value="4" name="ARRC_TRACE_TYPE_WAVEFORM_Q"/>
+      <entry value="5" name="ARRC_TRACE_TYPE_IQ_I"/>
+      <entry value="6" name="ARRC_TRACE_TYPE_IQ_Q"/>
+    </enum>
+    <enum name="ARRC_SCRIPT_STATE">
+      <entry value="0" name="ARRC_SCRIPT_STATE_IDLE"/>
+      <entry value="1" name="ARRC_SCRIPT_STATE_SELECTED"/>
+      <entry value="2" name="ARRC_SCRIPT_STATE_STARTING"/>
+      <entry value="3" name="ARRC_SCRIPT_STATE_RUNNING"/>
+      <entry value="4" name="ARRC_SCRIPT_STATE_STOPPING"/>
+      <entry value="5" name="ARRC_SCRIPT_STATE_CRASHED"/>
+    </enum>
+    <enum name="ARRC_SCRIPT_KIND">
+      <entry value="0" name="ARRC_SCRIPT_KIND_PLUGIN"><description>Runs beside the standard engine.</description></entry>
+      <entry value="1" name="ARRC_SCRIPT_KIND_EXCLUSIVE"><description>Takes the SDR over.</description></entry>
+    </enum>
+    <enum name="ARRC_SCRIPT_CAPS" bitmask="true">
+      <entry value="1" name="ARRC_SCRIPT_CAPS_NEEDS_RX"/>
+      <entry value="2" name="ARRC_SCRIPT_CAPS_NEEDS_TX"/>
+      <entry value="4" name="ARRC_SCRIPT_CAPS_RECORDS"/>
+      <entry value="8" name="ARRC_SCRIPT_CAPS_FLIGHT_SAFE"/>
+      <entry value="16" name="ARRC_SCRIPT_CAPS_LIVE_PARAMS"/>
+    </enum>
+    <enum name="ARRC_WAVEFORM_TYPE">
+      <entry value="0" name="ARRC_WAVEFORM_TYPE_RECT"/>
+      <entry value="1" name="ARRC_WAVEFORM_TYPE_LFM"/>
+      <entry value="2" name="ARRC_WAVEFORM_TYPE_NLFM"/>
+      <entry value="3" name="ARRC_WAVEFORM_TYPE_BARKER"/>
+      <entry value="4" name="ARRC_WAVEFORM_TYPE_P4"/>
+      <entry value="5" name="ARRC_WAVEFORM_TYPE_FRANK"/>
+      <entry value="6" name="ARRC_WAVEFORM_TYPE_CUSTOM"/>
+      <entry value="7" name="ARRC_WAVEFORM_TYPE_CW"/>
+    </enum>
+    <enum name="ARRC_WAVEFORM_KIND">
+      <entry value="0" name="ARRC_WAVEFORM_KIND_PULSE"><description>One pulse, repeated at the PRF.</description></entry>
+      <entry value="1" name="ARRC_WAVEFORM_KIND_FRAME"><description>One full repetition frame.</description></entry>
+    </enum>
+    <enum name="ARRC_SDR_ACTION">
+      <entry value="0" name="ARRC_SDR_ACTION_ENABLE"><description>Open the device.</description></entry>
+      <entry value="1" name="ARRC_SDR_ACTION_DISABLE"><description>Stop and release the device.</description></entry>
+      <entry value="2" name="ARRC_SDR_ACTION_START"/>
+      <entry value="3" name="ARRC_SDR_ACTION_STOP"/>
+      <entry value="4" name="ARRC_SDR_ACTION_RESET_SOFT"/>
+      <entry value="5" name="ARRC_SDR_ACTION_RESET_HARD"/>
+      <entry value="6" name="ARRC_SDR_ACTION_SELFTEST"/>
+    </enum>
+    <enum name="ARRC_SDR_SUBSYS" bitmask="true">
+      <entry value="1" name="ARRC_SDR_SUBSYS_RX"/>
+      <entry value="2" name="ARRC_SDR_SUBSYS_TX"/>
+      <entry value="4" name="ARRC_SDR_SUBSYS_REC"/>
+    </enum>
+    <enum name="ARRC_SCRIPT_ACTION">
+      <entry value="0" name="ARRC_SCRIPT_ACTION_SELECT"/>
+      <entry value="1" name="ARRC_SCRIPT_ACTION_START"/>
+      <entry value="2" name="ARRC_SCRIPT_ACTION_STOP"/>
+      <entry value="3" name="ARRC_SCRIPT_ACTION_RESTART"/>
+      <entry value="4" name="ARRC_SCRIPT_ACTION_RESCAN"/>
+    </enum>
+    <enum name="ARRC_RECORD_ACTION">
+      <entry value="0" name="ARRC_RECORD_ACTION_START_GATED"/>
+      <entry value="1" name="ARRC_RECORD_ACTION_STOP"/>
+      <entry value="2" name="ARRC_RECORD_ACTION_SNAPSHOT"><description>Bounded continuous capture.</description></entry>
+      <entry value="3" name="ARRC_RECORD_ACTION_NEW_SEGMENT"/>
+    </enum>
+    <enum name="ARRC_PROFILE_ACTION">
+      <entry value="0" name="ARRC_PROFILE_ACTION_SAVE"/>
+      <entry value="1" name="ARRC_PROFILE_ACTION_LOAD"/>
+      <entry value="2" name="ARRC_PROFILE_ACTION_DELETE"/>
+    </enum>
+    <enum name="MAV_CMD">
+      <entry value="47000" name="MAV_CMD_ARRC_SDR_CONTROL" hasLocation="false" isDestination="false">
+        <description>Control the companion computer SDR.</description>
+        <param index="1" label="Action" enum="ARRC_SDR_ACTION">Action.</param>
+        <param index="2" label="Subsystems" enum="ARRC_SDR_SUBSYS">Subsystem mask (0 = all).</param>
+        <param index="3">Empty.</param>
+        <param index="4">Empty.</param>
+        <param index="5">Empty.</param>
+        <param index="6">Empty.</param>
+        <param index="7">Empty.</param>
+      </entry>
+      <entry value="47001" name="MAV_CMD_ARRC_TX_ARM" hasLocation="false" isDestination="false">
+        <description>Arm or disarm SDR transmission. TX also needs mode TX or RXTX.</description>
+        <param index="1" label="Arm" minValue="0" maxValue="1" increment="1">1 to arm, 0 to disarm.</param>
+        <param index="2" label="Magic">Must be 21196 to arm.</param>
+        <param index="3" label="Timeout" units="s" minValue="0">Disarm automatically after this time (0 = companion default).</param>
+        <param index="4">Empty.</param>
+        <param index="5">Empty.</param>
+        <param index="6">Empty.</param>
+        <param index="7">Empty.</param>
+      </entry>
+      <entry value="47002" name="MAV_CMD_ARRC_SCRIPT" hasLocation="false" isDestination="false">
+        <description>Manage companion computer SDR scripts.</description>
+        <param index="1" label="Action" enum="ARRC_SCRIPT_ACTION">Action.</param>
+        <param index="2" label="Index" minValue="0" increment="1">Script index (from ARRC_SCRIPT_INFO).</param>
+        <param index="3">Empty.</param>
+        <param index="4">Empty.</param>
+        <param index="5">Empty.</param>
+        <param index="6">Empty.</param>
+        <param index="7">Empty.</param>
+      </entry>
+      <entry value="47003" name="MAV_CMD_ARRC_RECORD" hasLocation="false" isDestination="false">
+        <description>Control raw IQ recording on the companion computer.</description>
+        <param index="1" label="Action" enum="ARRC_RECORD_ACTION">Action.</param>
+        <param index="2" label="Duration" units="s" minValue="0">Maximum duration (0 = unlimited, snapshot: length).</param>
+        <param index="3" label="Size" units="MiB" minValue="0">Maximum size (0 = unlimited).</param>
+        <param index="4" label="Label" minValue="0" increment="1">User label number stored with the data.</param>
+        <param index="5">Empty.</param>
+        <param index="6">Empty.</param>
+        <param index="7">Empty.</param>
+      </entry>
+      <entry value="47004" name="MAV_CMD_ARRC_PROFILE" hasLocation="false" isDestination="false">
+        <description>Save, load or delete a stored SDR profile (main config, measurement config and port profile).</description>
+        <param index="1" label="Action" enum="ARRC_PROFILE_ACTION">Action.</param>
+        <param index="2" label="Slot" minValue="0" maxValue="31" increment="1">Profile slot.</param>
+        <param index="3">Empty.</param>
+        <param index="4">Empty.</param>
+        <param index="5">Empty.</param>
+        <param index="6">Empty.</param>
+        <param index="7">Empty.</param>
+      </entry>
+      <entry value="47005" name="MAV_CMD_ARRC_WAVEFORM_GEN" hasLocation="false" isDestination="false">
+        <description>Generate a waveform file on the companion computer at the current sample rate.</description>
+        <param index="1" label="Type" enum="ARRC_WAVEFORM_TYPE">Waveform type (RECT, LFM or BARKER).</param>
+        <param index="2" label="Pulse width" units="s" minValue="0">Pulse width.</param>
+        <param index="3" label="Bandwidth" units="Hz" minValue="0">Chirp bandwidth (LFM only).</param>
+        <param index="4" label="PRF" units="Hz" minValue="0">Default PRF stored in the file.</param>
+        <param index="5" label="Window" minValue="0" increment="1">0 none, 1 Hann, 2 Tukey(0.1).</param>
+        <param index="6">Empty.</param>
+        <param index="7">Empty.</param>
+      </entry>
+    </enum>
+  </enums>
+  <messages>
+    <message id="228" name="ARRC_SENSOR_RAW">
+      <description>ARRC RF measurement downlink (autopilot to GCS). Latest power/phase from the onboard SDR.</description>
+      <field type="uint32_t" name="time_boot_ms" units="ms">Autopilot time of sending.</field>
+      <field type="uint64_t" name="time_usec" units="us">Sample time on the autopilot boot clock.</field>
+      <field type="float" name="pwr_c" units="dBm">Co-pol power (NaN if unavailable).</field>
+      <field type="float" name="pwr_x" units="dBm">Cross-pol power (NaN if unavailable).</field>
+      <field type="float" name="phi_c" units="deg">Co-pol phase (see flags for the reference).</field>
+      <field type="float" name="phi_x" units="deg">Cross-pol phase relative to co-pol (NaN if unavailable).</field>
+      <extensions/>
+      <field type="float" name="snr_db" units="dB">Co-pol SNR.</field>
+      <field type="uint16_t" name="flags" enum="ARRC_MEAS_FLAGS" display="bitmask">Measurement flags.</field>
+      <field type="uint16_t" name="n_avg">Pulses or samples averaged (saturates at 65535).</field>
+    </message>
+    <message id="47000" name="ARRC_CC_STATUS">
+      <description>Companion computer health (1 Hz, broadcast).</description>
+      <field type="uint32_t" name="time_boot_ms" units="ms">Companion uptime.</field>
+      <field type="uint32_t" name="session_id">Data session id (links autopilot logs to the companion data folder).</field>
+      <field type="uint32_t" name="disk_free_mb" units="MiB">Free space on the data disk.</field>
+      <field type="uint32_t" name="dialect_hash">Hash of the MAVLink dialect the companion was built with.</field>
+      <field type="uint32_t" name="timesync_rtt_us" units="us">Last TIMESYNC round trip time.</field>
+      <field type="uint16_t" name="mem_used_mb" units="MiB">Memory used.</field>
+      <field type="uint16_t" name="flags" enum="ARRC_CC_FLAGS" display="bitmask">Status flags.</field>
+      <field type="uint8_t" name="state" enum="ARRC_CC_STATE">Mediator state.</field>
+      <field type="uint8_t" name="cpu_load" units="%">CPU load.</field>
+      <field type="int8_t" name="cpu_temp" units="degC">CPU temperature.</field>
+      <field type="char[16]" name="sw_version">Companion software version.</field>
+    </message>
+    <message id="47001" name="ARRC_SDR_STATUS">
+      <description>SDR engine status (1 Hz, broadcast).</description>
+      <field type="uint64_t" name="freq_hz" units="Hz">Centre frequency (RX and TX).</field>
+      <field type="uint32_t" name="sample_rate" units="Hz">Sample rate.</field>
+      <field type="uint32_t" name="bandwidth" units="Hz">Analog bandwidth.</field>
+      <field type="uint32_t" name="flags" enum="ARRC_SDR_FLAGS" display="bitmask">Status flags.</field>
+      <field type="uint32_t" name="overruns">RX overruns since start.</field>
+      <field type="uint32_t" name="rec_drops">Recorder records dropped since start.</field>
+      <field type="uint32_t" name="rec_mb" units="MiB">Data recorded in this session.</field>
+      <field type="float" name="meas_rate_hz" units="Hz">Actual measurement feed rate.</field>
+      <field type="float" name="prf_hz" units="Hz">Configured or tracked PRF.</field>
+      <field type="float[2]" name="rx_gain_db" units="dB">RX gain per channel.</field>
+      <field type="float" name="tx_gain_db" units="dB">TX gain.</field>
+      <field type="int16_t" name="rfic_temp" units="cdegC">RFIC temperature (INT16_MAX if unknown).</field>
+      <field type="uint16_t" name="tx_arm_remaining" units="s">Time until TX auto-disarm (0 if disarmed).</field>
+      <field type="uint8_t" name="state" enum="ARRC_SDR_STATE">Engine state.</field>
+      <field type="uint8_t" name="mode" enum="ARRC_SDR_MODE">Configured mode.</field>
+      <field type="uint8_t" name="port_profile">Active port profile index.</field>
+      <field type="uint8_t[2]" name="rx_role" enum="ARRC_PORT_ROLE">Role of RX1 and RX2.</field>
+      <field type="uint8_t" name="active_script">Running script index (255 = none).</field>
+      <field type="uint8_t" name="script_state" enum="ARRC_SCRIPT_STATE">Script state.</field>
+      <field type="char[16]" name="waveform">Selected waveform name.</field>
+    </message>
+    <message id="47002" name="ARRC_SDR_CONFIG">
+      <description>SDR main configuration. Sent by the GCS with op=SET; echoed by the companion with op=APPLIED. TX shares the frequency, waveform and PRF.</description>
+      <field type="uint64_t" name="freq_hz" units="Hz">Centre frequency.</field>
+      <field type="uint32_t" name="sample_rate" units="Hz">Sample rate.</field>
+      <field type="uint32_t" name="bandwidth" units="Hz">Analog bandwidth.</field>
+      <field type="float" name="prf_hz" units="Hz">PRF (0 = waveform default).</field>
+      <field type="uint32_t" name="num_pulses">TX pulses to send (0 = continuous).</field>
+      <field type="float[2]" name="rx_gain_db" units="dB">RX gain per channel.</field>
+      <field type="float[2]" name="tx_gain_db" units="dB">TX gain per channel.</field>
+      <field type="uint16_t" name="req_id">Request id, echoed.</field>
+      <field type="uint8_t" name="target_system">System ID.</field>
+      <field type="uint8_t" name="target_component">Component ID.</field>
+      <field type="uint8_t" name="op" enum="ARRC_CONFIG_OP">Operation.</field>
+      <field type="uint8_t" name="result" enum="ARRC_CONFIG_RESULT">Result (op=APPLIED only).</field>
+      <field type="uint8_t" name="mode" enum="ARRC_SDR_MODE">Mode.</field>
+      <field type="uint8_t" name="port_profile">Port profile index.</field>
+      <field type="uint8_t[2]" name="rx_role" enum="ARRC_PORT_ROLE">Role of RX1 and RX2.</field>
+      <field type="uint8_t[2]" name="tx_role" enum="ARRC_PORT_ROLE">Role of TX1 and TX2.</field>
+      <field type="uint8_t" name="gain_mode" enum="ARRC_GAIN_MODE">RX gain mode.</field>
+      <field type="uint8_t" name="clock_ref" enum="ARRC_CLOCK_REF">Reference clock.</field>
+      <field type="uint8_t" name="sample_fmt" enum="ARRC_SAMPLE_FMT">Sample format.</field>
+      <field type="uint8_t" name="tx_trigger" enum="ARRC_TX_TRIGGER">TX trigger.</field>
+      <field type="uint8_t" name="radar_tx_pol" enum="ARRC_RADAR_TX_POL">Radar transmit polarisation (metadata).</field>
+      <field type="char[16]" name="waveform">Waveform file name (template and TX pulse).</field>
+    </message>
+    <message id="47003" name="ARRC_SDR_MEAS_CONFIG">
+      <description>Measurement and gated recording configuration. Sent by the GCS with op=SET; echoed with op=APPLIED.</description>
+      <field type="uint32_t" name="avg_n">Pulses or samples per average.</field>
+      <field type="float" name="avg_time_s" units="s">Averaging time (avg_mode TIME).</field>
+      <field type="float" name="output_rate_hz" units="Hz">Maximum feed rate to the autopilot.</field>
+      <field type="float" name="threshold">Detection threshold: dB above noise (FIXED_DB) or false-alarm probability (CA_CFAR).</field>
+      <field type="float" name="min_pri_s" units="s">Minimum pulse spacing (0 = auto).</field>
+      <field type="float" name="range_gate_start_s" units="s">Range gate start after the PRI reference (0 = off).</field>
+      <field type="float" name="range_gate_len_s" units="s">Range gate length (0 = off).</field>
+      <field type="float" name="gate_pre_s" units="s">Recording window before the pulse.</field>
+      <field type="float" name="gate_post_s" units="s">Recording window after the pulse.</field>
+      <field type="float" name="coast_s" units="s">PRI tracker coast time without detections.</field>
+      <field type="float" name="cw_snap_len_s" units="s">CW snapshot length.</field>
+      <field type="float" name="cw_snap_period_s" units="s">CW snapshot period.</field>
+      <field type="float" name="cw_filter_bw_hz" units="Hz">CW channel filter bandwidth (0 = off).</field>
+      <field type="float" name="cw_offset_hz" units="Hz">CW tone offset (NaN = track).</field>
+      <field type="uint16_t" name="req_id">Request id, echoed.</field>
+      <field type="uint16_t" name="noise_every_n">Record one noise window every N PRIs (0 = off).</field>
+      <field type="uint16_t" name="rec_decimate_n">Record every Nth pulse (1 = all).</field>
+      <field type="uint8_t" name="target_system">System ID.</field>
+      <field type="uint8_t" name="target_component">Component ID.</field>
+      <field type="uint8_t" name="op" enum="ARRC_CONFIG_OP">Operation.</field>
+      <field type="uint8_t" name="result" enum="ARRC_CONFIG_RESULT">Result (op=APPLIED only).</field>
+      <field type="uint8_t" name="signal" enum="ARRC_SIGNAL_TYPE">Signal type.</field>
+      <field type="uint8_t" name="detector" enum="ARRC_DETECTOR">Pulse detector.</field>
+      <field type="uint8_t" name="avg_mode" enum="ARRC_AVG_MODE">Averaging mode.</field>
+      <field type="uint8_t" name="threshold_mode" enum="ARRC_THRESHOLD_MODE">Threshold mode.</field>
+      <field type="uint8_t" name="cfar_guard">CFAR guard cells per side.</field>
+      <field type="uint8_t" name="cfar_train">CFAR training cells per side.</field>
+      <field type="uint8_t" name="rec_mode" enum="ARRC_REC_MODE">Raw recording mode.</field>
+      <field type="uint8_t" name="gate_mode" enum="ARRC_GATE_MODE">Gating mode.</field>
+      <field type="uint8_t" name="noise_correct">1 to subtract the noise power from averaged power.</field>
+      <field type="char[16]" name="template_name">Matched-filter template (empty = main waveform).</field>
+    </message>
+    <message id="47004" name="ARRC_SDR_MEAS">
+      <description>Processed SDR measurement, companion to autopilot (targeted, nominal 30 Hz). Logged by the autopilot.</description>
+      <field type="uint64_t" name="time_usec" units="us">Centre of the averaging window on the autopilot boot clock.</field>
+      <field type="uint32_t" name="seq">Sequence number.</field>
+      <field type="float" name="pwr_c" units="dBm">Co-pol power (NaN if unavailable).</field>
+      <field type="float" name="pwr_x" units="dBm">Cross-pol power (NaN if unavailable).</field>
+      <field type="float" name="phi_c" units="deg">Co-pol phase (reference in phase_ref).</field>
+      <field type="float" name="phi_x" units="deg">Cross-pol phase relative to co-pol (NaN if unavailable).</field>
+      <field type="float" name="snr_db" units="dB">Co-pol SNR.</field>
+      <field type="float" name="noise_dbm" units="dBm">Co-pol noise power in the measurement bandwidth.</field>
+      <field type="float" name="cfo_hz" units="Hz">Carrier frequency offset estimate.</field>
+      <field type="float" name="toa_s" units="s">Mean time of arrival within the PRI (pulse mode).</field>
+      <field type="float[4]" name="values">Script-defined values (see the script manifest).</field>
+      <field type="uint16_t" name="n_avg">Pulses or samples averaged (saturates at 65535).</field>
+      <field type="uint16_t" name="n_pred">Predicted (undetected) pulses included.</field>
+      <field type="uint16_t" name="flags" enum="ARRC_MEAS_FLAGS" display="bitmask">Measurement flags.</field>
+      <field type="uint8_t" name="target_system">System ID.</field>
+      <field type="uint8_t" name="target_component">Component ID.</field>
+      <field type="uint8_t" name="phase_ref" enum="ARRC_PHASE_REF">Reference of phi_c.</field>
+      <field type="uint8_t" name="script_id">Producing script index (255 = standard engine).</field>
+    </message>
+    <message id="47005" name="ARRC_SDR_TRACE">
+      <description>Chunk of a quantised diagnostic trace (spectrum, matched-filter output, waveform). y = y0 + dy * data[i]; x = x0 + dx * (offset + i).</description>
+      <field type="uint64_t" name="time_usec" units="us">Trace time on the autopilot boot clock.</field>
+      <field type="uint32_t" name="trace_id">Trace id (same for all chunks of one trace).</field>
+      <field type="float" name="x0">X of the first point.</field>
+      <field type="float" name="dx">X step.</field>
+      <field type="float" name="y0">Y offset.</field>
+      <field type="float" name="dy">Y scale.</field>
+      <field type="uint16_t" name="n_points">Total points in the trace.</field>
+      <field type="uint16_t" name="offset">Index of data[0] in the trace.</field>
+      <field type="uint8_t" name="target_system">System ID.</field>
+      <field type="uint8_t" name="target_component">Component ID.</field>
+      <field type="uint8_t" name="trace_type" enum="ARRC_TRACE_TYPE">Trace type.</field>
+      <field type="uint8_t" name="len">Valid bytes in data.</field>
+      <field type="uint8_t[200]" name="data">Quantised samples.</field>
+    </message>
+    <message id="47006" name="ARRC_SCRIPT_INFO">
+      <description>Companion computer script catalogue entry (sent on request).</description>
+      <field type="uint32_t" name="manifest_hash">Hash of the script manifest.</field>
+      <field type="uint16_t" name="caps" enum="ARRC_SCRIPT_CAPS" display="bitmask">Capabilities.</field>
+      <field type="uint8_t" name="index">Script index.</field>
+      <field type="uint8_t" name="count">Number of scripts.</field>
+      <field type="uint8_t" name="state" enum="ARRC_SCRIPT_STATE">Script state.</field>
+      <field type="uint8_t" name="kind" enum="ARRC_SCRIPT_KIND">Script kind.</field>
+      <field type="int8_t" name="last_exit">Last exit code.</field>
+      <field type="char[24]" name="name">Script name.</field>
+      <field type="char[12]" name="version">Script version.</field>
+      <field type="char[100]" name="description">Short description.</field>
+    </message>
+    <message id="47007" name="ARRC_WAVEFORM_INFO">
+      <description>Waveform library entry on the companion computer (sent on request).</description>
+      <field type="uint32_t" name="sample_rate" units="Hz">File sample rate.</field>
+      <field type="uint32_t" name="n_samples">Samples in the file.</field>
+      <field type="uint32_t" name="data_hash32">First 32 bits of the SHA-256 of the samples.</field>
+      <field type="float" name="pulse_width_s" units="s">Pulse width.</field>
+      <field type="float" name="bandwidth_hz" units="Hz">Occupied bandwidth.</field>
+      <field type="float" name="prf_hz" units="Hz">Default PRF.</field>
+      <field type="uint8_t" name="index">Waveform index.</field>
+      <field type="uint8_t" name="count">Number of waveforms.</field>
+      <field type="uint8_t" name="waveform_type" enum="ARRC_WAVEFORM_TYPE">Waveform type.</field>
+      <field type="uint8_t" name="kind" enum="ARRC_WAVEFORM_KIND">Pulse or frame.</field>
+      <field type="char[16]" name="name">Waveform name.</field>
+    </message>
+    <message id="47008" name="ARRC_PORT_INFO">
+      <description>Port of a port profile on the companion computer (sent on request, one per configured port).</description>
+      <field type="float" name="gain_dbi" units="dB">Antenna gain (dBi, metadata).</field>
+      <field type="float" name="cable_loss_db" units="dB">Cable loss.</field>
+      <field type="float" name="ext_atten_db" units="dB">External attenuation.</field>
+      <field type="uint8_t" name="profile_index">Profile index.</field>
+      <field type="uint8_t" name="profile_count">Number of profiles.</field>
+      <field type="uint8_t" name="port" enum="ARRC_PORT_ID">Physical port.</field>
+      <field type="uint8_t" name="role" enum="ARRC_PORT_ROLE">Role.</field>
+      <field type="uint8_t" name="polarization" enum="ARRC_POLARIZATION">Antenna polarisation.</field>
+      <field type="uint8_t" name="active">1 if this profile is active.</field>
+      <field type="char[16]" name="profile_name">Profile name.</field>
+      <field type="char[16]" name="antenna">Antenna name.</field>
+    </message>
+  </messages>
+</mavlink>
