@@ -298,6 +298,14 @@
         <param index="7">Empty.</param>
       </entry>
     </enum>
+    <enum name="ARRC_REC_TRIGGER">
+      <description>What started the recording in progress.</description>
+      <entry value="0" name="ARRC_REC_TRIGGER_NONE"><description>Not recording.</description></entry>
+      <entry value="1" name="ARRC_REC_TRIGGER_MANUAL"><description>MAV_CMD_ARRC_RECORD (the GCS).</description></entry>
+      <entry value="2" name="ARRC_REC_TRIGGER_ARMED"><description>The vehicle armed.</description></entry>
+      <entry value="3" name="ARRC_REC_TRIGGER_TAKEOFF"><description>The vehicle took off again after a landing, still armed.</description></entry>
+      <entry value="4" name="ARRC_REC_TRIGGER_BOOT"><description>The companion's configuration records from start.</description></entry>
+    </enum>
     <enum name="ARRC_NAV_IMU_FLAGS" bitmask="true">
       <description>ARRC_NAV_IMU health flags.</description>
       <entry value="1" name="ARRC_NAV_IMU_FLAGS_GYRO_HEALTHY"><description>Gyro healthy.</description></entry>
@@ -375,6 +383,10 @@
       <field type="uint8_t" name="active_script">Running script index (255 = none).</field>
       <field type="uint8_t" name="script_state" enum="ARRC_SCRIPT_STATE">Script state.</field>
       <field type="char[16]" name="waveform">Selected waveform name.</field>
+      <extensions/>
+      <field type="uint32_t" name="rec_seconds" units="s">Duration of the recording in progress (0 when not recording).</field>
+      <field type="float" name="rec_size_mb" units="MiB">Size of the recording in progress, all its files.</field>
+      <field type="uint8_t" name="rec_trigger" enum="ARRC_REC_TRIGGER">What started the recording in progress.</field>
     </message>
     <message id="47002" name="ARRC_SDR_CONFIG">
       <description>SDR main configuration. Sent by the GCS with op=SET; echoed by the companion with op=APPLIED. TX shares the frequency, waveform and PRF.</description>
