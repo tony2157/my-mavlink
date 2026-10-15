@@ -3,6 +3,7 @@
   <!-- ARRC RFSonde dialect: companion computer (onboard SDR) <-> autopilot <-> GCS.
        Included from ardupilotmega.xml. Message ids 47000-47019 and MAV_CMD ids 47000-47009 are reserved for ARRC.
        The companion computer is MAV_COMP_ID_ONBOARD_COMPUTER (191). -->
+  <include>common.xml</include>
   <dialect>2</dialect>
   <enums>
     <enum name="ARRC_CC_STATE">
