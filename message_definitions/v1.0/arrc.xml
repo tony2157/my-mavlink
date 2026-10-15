@@ -298,6 +298,32 @@
         <param index="7">Empty.</param>
       </entry>
     </enum>
+    <enum name="ARRC_NAV_IMU_FLAGS" bitmask="true">
+      <description>ARRC_NAV_IMU health flags.</description>
+      <entry value="1" name="ARRC_NAV_IMU_FLAGS_GYRO_HEALTHY"><description>Gyro healthy.</description></entry>
+      <entry value="2" name="ARRC_NAV_IMU_FLAGS_ACCEL_HEALTHY"><description>Accelerometer healthy.</description></entry>
+    </enum>
+    <enum name="ARRC_NAV_GPS_FLAGS" bitmask="true">
+      <description>ARRC_NAV_GPS fields that are valid.</description>
+      <entry value="1" name="ARRC_NAV_GPS_FLAGS_VEL_D_VALID"><description>The receiver reports vertical velocity.</description></entry>
+      <entry value="2" name="ARRC_NAV_GPS_FLAGS_ALT_ELLIPSOID_VALID"><description>alt_ellipsoid is valid (the receiver reports the geoid separation).</description></entry>
+      <entry value="4" name="ARRC_NAV_GPS_FLAGS_H_ACC_VALID"><description>h_acc is valid.</description></entry>
+      <entry value="8" name="ARRC_NAV_GPS_FLAGS_V_ACC_VALID"><description>v_acc is valid.</description></entry>
+      <entry value="16" name="ARRC_NAV_GPS_FLAGS_S_ACC_VALID"><description>s_acc is valid.</description></entry>
+    </enum>
+    <enum name="ARRC_GIMBAL_MODE">
+      <description>ARRC gimbal pointing mode (MNT1_ARRC_GMODE).</description>
+      <entry value="0" name="ARRC_GIMBAL_MODE_ARDUPILOT"><description>ArduPilot pointing.</description></entry>
+      <entry value="1" name="ARRC_GIMBAL_MODE_PARALLEL_PLANES"><description>Parallel planes.</description></entry>
+      <entry value="2" name="ARRC_GIMBAL_MODE_HPOL"><description>Horizontal polarisation.</description></entry>
+      <entry value="3" name="ARRC_GIMBAL_MODE_VPOL"><description>Vertical polarisation.</description></entry>
+    </enum>
+    <enum name="ARRC_GIMBAL_FLAGS" bitmask="true">
+      <description>ARRC gimbal pointing limits.</description>
+      <entry value="1" name="ARRC_GIMBAL_FLAGS_ROLL_LIMIT"><description>Roll limited: pointing at the AUT, polarisation not aligned.</description></entry>
+      <entry value="2" name="ARRC_GIMBAL_FLAGS_PITCH_LIMIT"><description>Pitch limited: not pointing at the AUT.</description></entry>
+      <entry value="4" name="ARRC_GIMBAL_FLAGS_TOO_CLOSE"><description>Closer than the minimum distance: holding the last target.</description></entry>
+    </enum>
   </enums>
   <messages>
     <message id="228" name="ARRC_SENSOR_RAW">
@@ -486,6 +512,78 @@
       <field type="uint8_t" name="active">1 if this profile is active.</field>
       <field type="char[16]" name="profile_name">Profile name.</field>
       <field type="char[16]" name="antenna">Antenna name.</field>
+    </message>
+    <message id="47009" name="ARRC_NAV_IMU">
+      <description>IMU sample: the filtered values the autopilot logs as IMU. Autopilot to companion computer, for the companion's records. Sent once per new sample, at most at the interval the companion sets with MAV_CMD_SET_MESSAGE_INTERVAL, and only on that link.</description>
+      <field type="uint64_t" name="time_usec" units="us">Sample time on the autopilot boot clock.</field>
+      <field type="float[3]" name="gyro" units="rad/s">Angular rate, body frame (FRD).</field>
+      <field type="float[3]" name="accel" units="m/s/s">Specific force, body frame (FRD).</field>
+      <field type="int16_t" name="temperature" units="cdegC">IMU temperature.</field>
+      <field type="uint8_t" name="instance">IMU instance.</field>
+      <field type="uint8_t" name="flags" enum="ARRC_NAV_IMU_FLAGS" display="bitmask">Health.</field>
+    </message>
+    <message id="47010" name="ARRC_NAV_MAG">
+      <description>Compass sample: the field the autopilot logs as MAG (offsets and motor compensation applied). Autopilot to companion computer, for the companion's records. Sent once per new sample, at most at the interval the companion sets with MAV_CMD_SET_MESSAGE_INTERVAL, and only on that link.</description>
+      <field type="uint64_t" name="time_usec" units="us">Sample time on the autopilot boot clock.</field>
+      <field type="float[3]" name="field" units="mgauss">Magnetic field, body frame (FRD).</field>
+      <field type="uint8_t" name="instance">Compass instance (priority order).</field>
+      <field type="uint8_t" name="healthy">1 if the compass is healthy.</field>
+    </message>
+    <message id="47011" name="ARRC_NAV_BARO">
+      <description>Barometer sample: the values the autopilot logs as BARO. Autopilot to companion computer, for the companion's records. Sent once per new sample, at most at the interval the companion sets with MAV_CMD_SET_MESSAGE_INTERVAL, and only on that link.</description>
+      <field type="uint64_t" name="time_usec" units="us">Sample time on the autopilot boot clock.</field>
+      <field type="float" name="pressure" units="Pa">Pressure.</field>
+      <field type="float" name="altitude" units="m">Altitude relative to the ground-level calibration.</field>
+      <field type="float" name="temperature" units="degC">Temperature.</field>
+      <field type="uint8_t" name="instance">Barometer instance.</field>
+      <field type="uint8_t" name="healthy">1 if the barometer is healthy.</field>
+    </message>
+    <message id="47012" name="ARRC_NAV_GPS">
+      <description>GNSS fix: the values the autopilot logs as GPS and GPA. Autopilot to companion computer, for the companion's records. Sent once per new sample, at most at the interval the companion sets with MAV_CMD_SET_MESSAGE_INTERVAL, and only on that link.</description>
+      <field type="uint64_t" name="time_usec" units="us">Time the autopilot received the fix (jitter-corrected where the driver supports it), autopilot boot clock.</field>
+      <field type="uint32_t" name="time_week_ms" units="ms">GNSS time of week of the fix.</field>
+      <field type="int32_t" name="lat" units="degE7">Latitude (WGS84).</field>
+      <field type="int32_t" name="lon" units="degE7">Longitude (WGS84).</field>
+      <field type="int32_t" name="alt" units="mm">Altitude above mean sea level.</field>
+      <field type="int32_t" name="alt_ellipsoid" units="mm">Altitude above the WGS84 ellipsoid (see flags).</field>
+      <field type="float[3]" name="vel" units="m/s">Velocity, north east down.</field>
+      <field type="float" name="h_acc" units="m">Horizontal position accuracy (see flags).</field>
+      <field type="float" name="v_acc" units="m">Vertical position accuracy (see flags).</field>
+      <field type="float" name="s_acc" units="m/s">Speed accuracy (see flags).</field>
+      <field type="uint16_t" name="time_week">GNSS week number.</field>
+      <field type="uint16_t" name="hdop">Horizontal dilution of precision, x100.</field>
+      <field type="uint16_t" name="vdop">Vertical dilution of precision, x100.</field>
+      <field type="uint8_t" name="fix_type" enum="GPS_FIX_TYPE">Fix type.</field>
+      <field type="uint8_t" name="satellites">Satellites used.</field>
+      <field type="uint8_t" name="instance">GPS instance.</field>
+      <field type="uint8_t" name="flags" enum="ARRC_NAV_GPS_FLAGS" display="bitmask">Valid fields.</field>
+    </message>
+    <message id="47013" name="ARRC_NAV_ECEF">
+      <description>High-precision ECEF position (u-blox UBX-NAV-HPPOSECEF): the values the autopilot logs as ECEF. Metres: X = ecef[0]*0.01 + ecef_hp[0]*0.0001, Y and Z alike. Autopilot to companion computer, for the companion's records. Sent once per new sample, at most at the interval the companion sets with MAV_CMD_SET_MESSAGE_INTERVAL, and only on that link.</description>
+      <field type="uint64_t" name="time_usec" units="us">Time the autopilot received it, autopilot boot clock.</field>
+      <field type="uint32_t" name="time_week_ms" units="ms">GNSS time of week (iTOW).</field>
+      <field type="int32_t[3]" name="ecef" units="cm">ECEF X, Y, Z.</field>
+      <field type="uint32_t" name="p_acc">3D position accuracy, in 0.1 mm.</field>
+      <field type="uint16_t" name="time_week">GNSS week number.</field>
+      <field type="int8_t[3]" name="ecef_hp">High-precision part of X, Y, Z, in 0.1 mm.</field>
+      <field type="uint8_t" name="flags">Receiver flags (bit 0: ECEF invalid).</field>
+      <field type="uint8_t" name="instance">GPS instance.</field>
+    </message>
+    <message id="47014" name="ARRC_GIMBAL_POINTING">
+      <description>ARRC gimbal pointing solution: the values the autopilot logs as ARGM, plus the pointing target. Autopilot to companion computer, for the companion's records. Sent once per new sample, at most at the interval the companion sets with MAV_CMD_SET_MESSAGE_INTERVAL, and only on that link.</description>
+      <field type="uint64_t" name="time_usec" units="us">Time of the solution, autopilot boot clock.</field>
+      <field type="float[4]" name="q">Commanded gimbal attitude, earth frame (w, x, y, z).</field>
+      <field type="float[3]" name="probe_pos" units="m">Probe position in the AUT frame: x along MNT1_ARRC_AZTH, y left, z up.</field>
+      <field type="int32_t" name="target_lat" units="degE7">Pointing target (AUT) latitude.</field>
+      <field type="int32_t" name="target_lon" units="degE7">Pointing target (AUT) longitude.</field>
+      <field type="int32_t" name="target_alt" units="mm">Pointing target (AUT) altitude above mean sea level.</field>
+      <field type="float" name="pointing_err" units="deg">Pointing error of the gimbal's measured attitude (NaN if the gimbal does not report it).</field>
+      <field type="float" name="pol_err" units="deg">Polarisation error of the measured attitude about the commanded boresight (NaN if not reported).</field>
+      <field type="float" name="pol_offset" units="deg">Polarisation offset (MNT1_ARRC_POFF).</field>
+      <field type="uint8_t" name="mount_mode" enum="MAV_MOUNT_MODE">Mount mode.</field>
+      <field type="uint8_t" name="gimbal_mode" enum="ARRC_GIMBAL_MODE">ARRC gimbal mode in use.</field>
+      <field type="uint8_t" name="flags" enum="ARRC_GIMBAL_FLAGS" display="bitmask">Limits.</field>
+      <field type="uint8_t" name="instance">Mount instance.</field>
     </message>
   </messages>
 </mavlink>
