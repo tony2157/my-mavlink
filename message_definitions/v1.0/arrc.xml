@@ -20,9 +20,10 @@
       <entry value="2" name="ARRC_CC_FLAGS_GCS_SEEN"><description>GCS heartbeat received recently.</description></entry>
       <entry value="4" name="ARRC_CC_FLAGS_TIMESYNC_OK"><description>Clock mapped to the autopilot boot clock.</description></entry>
       <entry value="8" name="ARRC_CC_FLAGS_UTC_VALID"><description>UTC known (from SYSTEM_TIME).</description></entry>
-      <entry value="16" name="ARRC_CC_FLAGS_DISK_OK"><description>Data disk above the reserve.</description></entry>
+      <entry value="16" name="ARRC_CC_FLAGS_DISK_OK"><description>Data disk free space above the reserve: recording is possible.</description></entry>
       <entry value="32" name="ARRC_CC_FLAGS_ENGINE_OK"><description>SDR engine process running.</description></entry>
       <entry value="64" name="ARRC_CC_FLAGS_THERMAL_THROTTLE"><description>CPU thermal throttling.</description></entry>
+      <entry value="128" name="ARRC_CC_FLAGS_DISK_LOW"><description>Data disk free space at or below the warning level (20 % of its size by default): download and erase data. Recording continues down to the reserve.</description></entry>
     </enum>
     <enum name="ARRC_SDR_STATE">
       <description>SDR engine state.</description>
@@ -361,6 +362,10 @@
       <field type="uint8_t" name="cpu_load" units="%">CPU load.</field>
       <field type="int8_t" name="cpu_temp" units="degC">CPU temperature.</field>
       <field type="char[16]" name="sw_version">Companion software version.</field>
+      <extensions/>
+      <field type="uint32_t" name="disk_total_mb" units="MiB">Size of the data disk (0 if unknown).</field>
+      <field type="uint16_t" name="data_port">TCP port of the companion's data service (download and erase over Ethernet), 0 if off.</field>
+      <field type="char[16]" name="hostname">Companion host name: on Ethernet it answers as hostname.local.</field>
     </message>
     <message id="47001" name="ARRC_SDR_STATUS">
       <description>SDR engine status (1 Hz, broadcast).</description>
