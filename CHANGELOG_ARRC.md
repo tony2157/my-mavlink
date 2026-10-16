@@ -8,6 +8,8 @@ newest first, with the dialect hash after each (see `README_ARRC.md` for the rul
 
 Documentation only; hash `0x7EFB3788`, every `crc_extra` unchanged; no consumer bump needed.
 
+- `arrc: profile delete moves the slots above down one`: `ARRC_PROFILE_ACTION_DELETE` says the
+  companion renumbers the slots above the deleted one, so the saved profiles stay contiguous.
 - `arrc: add README_ARRC.md and CHANGELOG_ARRC.md with the pairing table`.
 - `arrc: describe every enum and entry, cpu_temp 127, 16-char hostname`: a description on the 28
   enums and 117 entries that had none, from the companion's code; `ARRC_CC_STATUS.cpu_temp` 127 means

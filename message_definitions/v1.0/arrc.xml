@@ -264,7 +264,7 @@
       <description>MAV_CMD_ARRC_PROFILE action on a profile slot (0-31), stored on the companion as a JSON file.</description>
       <entry value="0" name="ARRC_PROFILE_ACTION_SAVE"><description>Save the main and measurement configuration in effect to the slot.</description></entry>
       <entry value="1" name="ARRC_PROFILE_ACTION_LOAD"><description>Apply the slot's main and measurement configuration.</description></entry>
-      <entry value="2" name="ARRC_PROFILE_ACTION_DELETE"><description>Delete the slot.</description></entry>
+      <entry value="2" name="ARRC_PROFILE_ACTION_DELETE"><description>Delete the slot. The slots above it move down one, so the saved profiles stay contiguous; a STATUSTEXT names the moved slots.</description></entry>
     </enum>
     <enum name="MAV_CMD">
       <entry value="47000" name="MAV_CMD_ARRC_SDR_CONTROL" hasLocation="false" isDestination="false">
