@@ -160,6 +160,12 @@
       <entry value="1" name="ARRC_GATE_MODE_PRI_TRACK"><description>Gate at detected and predicted pulse times (tracks the PRI).</description></entry>
       <entry value="2" name="ARRC_GATE_MODE_FIXED_PRI"><description>Gate at the configured PRF, aligned by the first detection.</description></entry>
     </enum>
+    <enum name="ARRC_WF_FILTER">
+      <description>Waveform filter of the standard measurement (ARRC_SDR_MEAS_CONFIG wf_filter): whether each detected pulse is tested against the matched-filter template. A pulse passes when its matched-filter response around the peak (the template length plus the gate windows each side) is the template's own autocorrelation to within the noise and wf_tol_db. Matched-filter detector with a template only.</description>
+      <entry value="0" name="ARRC_WF_FILTER_OFF"><description>No test: every detection is measured and recorded.</description></entry>
+      <entry value="1" name="ARRC_WF_FILTER_MONITOR"><description>Test and report (match, mismatched count, ARRC_MEAS_FLAGS_WF_MISMATCH) but exclude nothing.</description></entry>
+      <entry value="2" name="ARRC_WF_FILTER_ENFORCE"><description>Test and exclude: a detection is tested when it would be picked; a mismatched one is counted but not averaged, not recorded as gated IQ, not given to the PRI tracker, and does not hide a matching pulse within the minimum separation.</description></entry>
+    </enum>
     <enum name="ARRC_PHASE_REF">
       <description>Reference of the co-pol phase phi_c in ARRC_SDR_MEAS.</description>
       <entry value="0" name="ARRC_PHASE_REF_NONE"><description>phi_c has no reference.</description></entry>
@@ -180,6 +186,8 @@
       <entry value="256" name="ARRC_MEAS_FLAGS_NOISE_CORRECTED"><description>Noise power subtracted from the powers (noise_correct).</description></entry>
       <entry value="512" name="ARRC_MEAS_FLAGS_PREDICTED"><description>Includes predicted (undetected) pulses.</description></entry>
       <entry value="1024" name="ARRC_MEAS_FLAGS_SIMULATED"><description>Simulated device, not RF.</description></entry>
+      <entry value="2048" name="ARRC_MEAS_FLAGS_WF_MISMATCH"><description>The waveform filter found detections that the matched-filter template does not explain (another waveform or interference) since the previous message: excluded with wf_filter ENFORCE, still averaged with MONITOR.</description></entry>
+      <entry value="4096" name="ARRC_MEAS_FLAGS_WF_FILTERED"><description>The waveform filter is enforcing (wf_filter ENFORCE): the power, phase and gated recording hold only pulses that match the template.</description></entry>
     </enum>
     <enum name="ARRC_TRACE_TYPE">
       <description>Content of an ARRC_SDR_TRACE, requested with MAV_CMD_REQUEST_MESSAGE (param2 = trace type).</description>
@@ -480,6 +488,9 @@
       <field type="uint8_t" name="gate_mode" enum="ARRC_GATE_MODE">Gating mode.</field>
       <field type="uint8_t" name="noise_correct">1 to subtract the noise power from averaged power.</field>
       <field type="char[16]" name="template_name">Matched-filter template (empty = main waveform).</field>
+      <extensions/>
+      <field type="uint8_t" name="wf_filter" enum="ARRC_WF_FILTER">Waveform filter.</field>
+      <field type="float" name="wf_tol_db" units="dB">Waveform filter tolerance: how far below a perfect match (0 dB) a pulse may be and still pass, beyond the noise (0 = companion default, 3 dB).</field>
     </message>
     <message id="47004" name="ARRC_SDR_MEAS">
       <description>Processed SDR measurement, companion to autopilot (targeted, nominal 30 Hz). Logged by the autopilot.</description>
@@ -501,6 +512,9 @@
       <field type="uint8_t" name="target_component">Component ID.</field>
       <field type="uint8_t" name="phase_ref" enum="ARRC_PHASE_REF">Reference of phi_c.</field>
       <field type="uint8_t" name="script_id">Producing script index (255 = standard engine).</field>
+      <extensions/>
+      <field type="uint16_t" name="n_wf_rej">Detections the waveform filter found mismatched since the previous message, at the minimum pulse separation from each other: with ENFORCE those it kept out of the measurement, with MONITOR the averaged pulses that failed (saturates at 65535; 0 with the filter off).</field>
+      <field type="float" name="wf_match_db" units="dB">Mean match of the averaged pulses to the template (0 dB = perfect, NaN with the filter off or without pulses).</field>
     </message>
     <message id="47005" name="ARRC_SDR_TRACE">
       <description>Chunk of a quantised diagnostic trace (spectrum, matched-filter output, waveform). y = y0 + dy * data[i]; x = x0 + dx * (offset + i).</description>

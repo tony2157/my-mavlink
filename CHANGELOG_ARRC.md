@@ -4,7 +4,19 @@ Dialect commits on `ArduPilot-4.7-ARRC-SDR` that touch `message_definitions/v1.0
 (`git log --oneline origin/ArduPilot-4.7-ARRC..ArduPilot-4.7-ARRC-SDR -- message_definitions/v1.0/arrc.xml`),
 newest first, with the dialect hash after each (see `README_ARRC.md` for the rule).
 
-## Unreleased (this branch head)
+## Branch `ArduPilot-4.7-ARRC-SDR-WFfilter` (2026-10-27): waveform filter
+
+Extension fields only; hash unchanged, `0x7EFB3788` (`ARRC_SDR_MEAS_CONFIG` `crc_extra` 94,
+`ARRC_SDR_MEAS` 21). Consumers can be bumped one at a time; the autopilot routes and logs the longer
+messages without a rebuild (no message-length check in its parser, and its decode zero-fills or cuts).
+
+- `ARRC_SDR_MEAS_CONFIG`: `wf_filter` (new enum `ARRC_WF_FILTER`: OFF, MONITOR, ENFORCE) and
+  `wf_tol_db`. A GCS that does not send them leaves the filter off.
+- `ARRC_SDR_MEAS`: `n_wf_rej` (mismatched detections since the previous message) and `wf_match_db`.
+- `ARRC_MEAS_FLAGS_WF_MISMATCH` (2048) and `ARRC_MEAS_FLAGS_WF_FILTERED` (4096), which also reach the
+  GCS in the autopilot's `ARRC_SENSOR_RAW.flags`.
+
+## Unreleased (`ArduPilot-4.7-ARRC-SDR` head)
 
 Documentation only; hash `0x7EFB3788`, every `crc_extra` unchanged; no consumer bump needed.
 
