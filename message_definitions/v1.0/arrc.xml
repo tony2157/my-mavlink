@@ -574,13 +574,17 @@
       <field type="char[16]" name="antenna">Antenna name.</field>
     </message>
     <message id="47009" name="ARRC_NAV_IMU">
-      <description>IMU sample: the filtered values the autopilot logs as IMU. Autopilot to companion computer, for the companion's records. Sent once per new sample, at most at the interval the companion sets with MAV_CMD_SET_MESSAGE_INTERVAL, and only on that link.</description>
+      <description>IMU sample: the filtered values the autopilot logs as IMU, plus the unfiltered integrals the EKF uses. Autopilot to companion computer, for the companion's records. Sent once per new sample, at most at the interval the companion sets with MAV_CMD_SET_MESSAGE_INTERVAL, and only on that link. gyro and accel are low-pass and notch filtered (INS_GYRO_FILTER, INS_ACCEL_FILTER, INS_HNTCH_*), so they lag the motion; delta_angle and delta_velocity have no filter delay and lose nothing between two messages.</description>
       <field type="uint64_t" name="time_usec" units="us">Sample time on the autopilot boot clock.</field>
       <field type="float[3]" name="gyro" units="rad/s">Angular rate, body frame (FRD).</field>
       <field type="float[3]" name="accel" units="m/s/s">Specific force, body frame (FRD).</field>
       <field type="int16_t" name="temperature" units="cdegC">IMU temperature.</field>
       <field type="uint8_t" name="instance">IMU instance.</field>
       <field type="uint8_t" name="flags" enum="ARRC_NAV_IMU_FLAGS" display="bitmask">Health.</field>
+      <extensions/>
+      <field type="float[3]" name="delta_angle" units="rad">Rotation over delta_time, ending at time_usec: the autopilot's per-loop delta angles (unfiltered gyro samples, coning corrected) since the previous ARRC_NAV_IMU on this link, accumulated as a quaternion. Rotation vector in the body frame (FRD) at the start of the interval.</field>
+      <field type="float[3]" name="delta_velocity" units="m/s">Velocity change over delta_time from the unfiltered accelerometer samples (specific force, gravity not removed), rotated into the body frame (FRD) at the start of the interval.</field>
+      <field type="float" name="delta_time" units="s">Interval of delta_angle and delta_velocity. 0: not available. A message held back makes the next interval longer; no sample is lost.</field>
     </message>
     <message id="47010" name="ARRC_NAV_MAG">
       <description>Compass sample: the field the autopilot logs as MAG (offsets and motor compensation applied). Autopilot to companion computer, for the companion's records. Sent once per new sample, at most at the interval the companion sets with MAV_CMD_SET_MESSAGE_INTERVAL, and only on that link.</description>
@@ -617,6 +621,8 @@
       <field type="uint8_t" name="satellites">Satellites used.</field>
       <field type="uint8_t" name="instance">GPS instance.</field>
       <field type="uint8_t" name="flags" enum="ARRC_NAV_GPS_FLAGS" display="bitmask">Valid fields.</field>
+      <extensions/>
+      <field type="uint64_t" name="epoch_usec" units="us">Fix epoch on the autopilot boot clock as the GPS driver estimates it: the jitter-corrected time the receiver output the fix (serial receive time, or the DroneCAN node's receive time mapped to this clock). It lags the true epoch by the receiver's output latency. 0 if the driver has no such estimate.</field>
     </message>
     <message id="47013" name="ARRC_NAV_ECEF">
       <description>High-precision ECEF position (u-blox UBX-NAV-HPPOSECEF): the values the autopilot logs as ECEF. Metres: X = ecef[0]*0.01 + ecef_hp[0]*0.0001, Y and Z alike. Autopilot to companion computer, for the companion's records. Sent once per new sample, at most at the interval the companion sets with MAV_CMD_SET_MESSAGE_INTERVAL, and only on that link.</description>
@@ -644,6 +650,11 @@
       <field type="uint8_t" name="gimbal_mode" enum="ARRC_GIMBAL_MODE">ARRC gimbal mode in use.</field>
       <field type="uint8_t" name="flags" enum="ARRC_GIMBAL_FLAGS" display="bitmask">Limits.</field>
       <field type="uint8_t" name="instance">Mount instance.</field>
+      <extensions/>
+      <field type="float[4]" name="q_meas">Attitude the gimbal last reported (GIMBAL_DEVICE_ATTITUDE_STATUS q, w x y z), as the gimbal sent it: its yaw is relative to the vehicle heading when gimbal_flags has GIMBAL_DEVICE_FLAGS_YAW_IN_VEHICLE_FRAME, or has neither frame flag nor YAW_LOCK. NaN if no status within 1 s.</field>
+      <field type="uint64_t" name="meas_usec" units="us">Autopilot boot time the autopilot received that status. 0 if none. Repeated values are the same status sent again.</field>
+      <field type="uint32_t" name="gimbal_time_ms" units="ms">The status's own time_boot_ms (the gimbal's clock).</field>
+      <field type="uint16_t" name="gimbal_flags" enum="GIMBAL_DEVICE_FLAGS" display="bitmask">The status's flags.</field>
     </message>
   </messages>
 </mavlink>

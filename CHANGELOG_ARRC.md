@@ -4,6 +4,18 @@ Dialect commits on `ArduPilot-4.7-ARRC-SDR` that touch `message_definitions/v1.0
 (`git log --oneline origin/ArduPilot-4.7-ARRC..ArduPilot-4.7-ARRC-SDR -- message_definitions/v1.0/arrc.xml`),
 newest first, with the dialect hash after each (see `README_ARRC.md` for the rule).
 
+## Branch `ArduPilot-4.7-ARRC-SDR-timing` (2026-11-02): sample times for post-processing
+
+Extension fields only; hash unchanged, `0x7EFB3788` (`ARRC_NAV_IMU` `crc_extra` 19, `ARRC_NAV_GPS` 83,
+`ARRC_GIMBAL_POINTING` 216). An older consumer reads the messages without the new fields.
+
+- `ARRC_NAV_IMU`: `delta_angle`, `delta_velocity`, `delta_time`, the unfiltered integrals the EKF uses,
+  accumulated between two messages (no filter lag, nothing lost at the 25 Hz log rate).
+- `ARRC_NAV_GPS`: `epoch_usec`, the driver's jitter-corrected fix time in µs (`time_usec` is rounded
+  to the millisecond).
+- `ARRC_GIMBAL_POINTING`: `q_meas`, `meas_usec`, `gimbal_time_ms`, `gimbal_flags`: the gimbal's measured
+  attitude with its receive time and its own clock (the message's `q` is the command).
+
 ## Branch `ArduPilot-4.7-ARRC-SDR-WFfilter` (2026-10-27): waveform filter
 
 Extension fields only; hash unchanged, `0x7EFB3788` (`ARRC_SDR_MEAS_CONFIG` `crc_extra` 94,
