@@ -4,6 +4,16 @@ Dialect commits on `ArduPilot-4.7-ARRC-SDR` that touch `message_definitions/v1.0
 (`git log --oneline origin/ArduPilot-4.7-ARRC..ArduPilot-4.7-ARRC-SDR -- message_definitions/v1.0/arrc.xml`),
 newest first, with the dialect hash after each (see `README_ARRC.md` for the rule).
 
+## 2026-11-04: packed samples and the clipping levels
+
+Enum entries and descriptions only; hash unchanged, `0x7EFB3788`, and no message changes. Companion and
+Ludifly move together; the autopilot passes the flags on in `ARRC_SENSOR_RAW.flags` without a rebuild.
+
+- `ARRC_SAMPLE_FMT_SC16_Q11_PACKED` (2): all 12 bits in 3 bytes per sample, RX only for now.
+- `ARRC_MEAS_FLAGS_NEAR_CLIP` (8192) and `ARRC_SDR_FLAGS_NEAR_CLIP` (2048): the I/Q envelope reached -9 dBFS.
+- `ARRC_MEAS_FLAGS_SATURATED` and `ARRC_SDR_FLAGS_SATURATED` now mean the envelope reached -5 dBFS (the
+  flight-measured clip onset); the old test of single I or Q samples at 95 % caught 16 of 848 clipped pulses.
+
 ## Branch `ArduPilot-4.7-ARRC-SDR-timing` (2026-11-02): sample times for post-processing
 
 Extension fields only; hash unchanged, `0x7EFB3788` (`ARRC_NAV_IMU` `crc_extra` 19, `ARRC_NAV_GPS` 83,
