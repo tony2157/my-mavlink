@@ -50,6 +50,7 @@
       <entry value="512" name="ARRC_SDR_FLAGS_PRI_LOCKED"><description>Pulse repetition tracker locked.</description></entry>
       <entry value="1024" name="ARRC_SDR_FLAGS_SIMULATED"><description>Simulated device (no hardware).</description></entry>
       <entry value="2048" name="ARRC_SDR_FLAGS_NEAR_CLIP"><description>Near clipping in the last status period: the I/Q envelope reached -9 dBFS but not -5 dBFS.</description></entry>
+      <entry value="4096" name="ARRC_SDR_FLAGS_USB3"><description>SDR on a USB 3 SuperSpeed link. Clear: USB 2 High Speed (about 45 MB/s of samples) or not known.</description></entry>
     </enum>
     <enum name="ARRC_SDR_MODE">
       <description>SDR operating mode. TX shares the RX frequency, waveform and PRF.</description>

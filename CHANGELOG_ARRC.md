@@ -4,6 +4,13 @@ Dialect commits on `ArduPilot-4.7-ARRC-SDR` that touch `message_definitions/v1.0
 (`git log --oneline origin/ArduPilot-4.7-ARRC..ArduPilot-4.7-ARRC-SDR -- message_definitions/v1.0/arrc.xml`),
 newest first, with the dialect hash after each (see `README_ARRC.md` for the rule).
 
+## 2026-11-17: USB 3 flag
+
+Enum entry only; hash unchanged, `0x7EFB3788`. A companion that does not set it reads as USB 2 or not known.
+
+- `ARRC_SDR_FLAGS_USB3` (4096): the bladeRF is on a USB 3 SuperSpeed link, so Ludifly stops warning about the
+  USB 2 limit (about 45 MB/s of samples) and offers rates the processing can keep up with instead.
+
 ## 2026-11-04: packed samples and the clipping levels
 
 Enum entries and descriptions only; hash unchanged, `0x7EFB3788`, and no message changes. Companion and
