@@ -388,6 +388,7 @@
       <field type="float" name="snr_db" units="dB">Co-pol SNR.</field>
       <field type="uint16_t" name="flags" enum="ARRC_MEAS_FLAGS" display="bitmask">Measurement flags.</field>
       <field type="uint16_t" name="n_avg">Pulses or samples averaged (saturates at 65535).</field>
+      <field type="float" name="noise_dbm" units="dBm">Co-pol noise power in the measurement bandwidth, also without a detected pulse (NaN if unavailable).</field>
     </message>
     <message id="47000" name="ARRC_CC_STATUS">
       <description>Companion computer health (1 Hz, broadcast).</description>
