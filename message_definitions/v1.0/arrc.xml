@@ -91,7 +91,7 @@
       <entry value="11" name="ARRC_PORT_ROLE_TX_AUX"><description>Second transmit port.</description></entry>
     </enum>
     <enum name="ARRC_POLARIZATION">
-      <description>Polarisation of the antenna on a port (port profile metadata).</description>
+      <description>Polarisation of the antenna on a port (metadata: a port profile, or what the operator entered).</description>
       <entry value="0" name="ARRC_POLARIZATION_UNKNOWN"><description>Not specified.</description></entry>
       <entry value="1" name="ARRC_POLARIZATION_H"><description>Horizontal linear.</description></entry>
       <entry value="2" name="ARRC_POLARIZATION_V"><description>Vertical linear.</description></entry>
@@ -99,6 +99,13 @@
       <entry value="4" name="ARRC_POLARIZATION_LHCP"><description>Left-hand circular.</description></entry>
       <entry value="5" name="ARRC_POLARIZATION_SLANT45"><description>Linear, slanted 45 degrees.</description></entry>
       <entry value="6" name="ARRC_POLARIZATION_SLANT135"><description>Linear, slanted 135 degrees.</description></entry>
+    </enum>
+    <enum name="ARRC_RX_SETUP_FLAGS" bitmask="true">
+      <description>ARRC_SDR_CONFIG: which pad and LNA values the operator entered. A clear bit means UNKNOWN, whatever the value field holds.</description>
+      <entry value="1" name="ARRC_RX_SETUP_FLAGS_RX1_PAD"><description>rx_pad_db[0] entered.</description></entry>
+      <entry value="2" name="ARRC_RX_SETUP_FLAGS_RX2_PAD"><description>rx_pad_db[1] entered.</description></entry>
+      <entry value="4" name="ARRC_RX_SETUP_FLAGS_RX1_LNA"><description>rx_lna_db[0] entered.</description></entry>
+      <entry value="8" name="ARRC_RX_SETUP_FLAGS_RX2_LNA"><description>rx_lna_db[1] entered.</description></entry>
     </enum>
     <enum name="ARRC_RADAR_TX_POL">
       <description>Transmit polarisation mode of the radar under test (session metadata).</description>
@@ -459,6 +466,13 @@
       <field type="uint8_t" name="tx_trigger" enum="ARRC_TX_TRIGGER">TX trigger.</field>
       <field type="uint8_t" name="radar_tx_pol" enum="ARRC_RADAR_TX_POL">Radar transmit polarisation (metadata).</field>
       <field type="char[16]" name="waveform">Waveform file name (template and TX pulse).</field>
+      <extensions/>
+      <field type="char[16]" name="antenna_rx1">Antenna on RX1 as the operator describes it (metadata, recorded); empty = UNKNOWN.</field>
+      <field type="char[16]" name="antenna_rx2">Antenna on RX2 as the operator describes it (metadata, recorded); empty = UNKNOWN.</field>
+      <field type="uint8_t[2]" name="rx_pol" enum="ARRC_POLARIZATION">Polarisation of the antenna on RX1 and RX2 (metadata, recorded).</field>
+      <field type="float[2]" name="rx_pad_db" units="dB">Attenuator (pad) at RX1 and RX2 (metadata, recorded; not applied to the reported power). Valid when its rx_setup_flags bit is set.</field>
+      <field type="float[2]" name="rx_lna_db" units="dB">LNA gain ahead of RX1 and RX2 (metadata, recorded; not applied to the reported power). Valid when its rx_setup_flags bit is set.</field>
+      <field type="uint8_t" name="rx_setup_flags" enum="ARRC_RX_SETUP_FLAGS" display="bitmask">Pad and LNA values entered; a clear bit is UNKNOWN (also what a sender without these fields gives).</field>
     </message>
     <message id="47003" name="ARRC_SDR_MEAS_CONFIG">
       <description>Measurement and gated recording configuration. Sent by the GCS with op=SET; echoed with op=APPLIED.</description>
