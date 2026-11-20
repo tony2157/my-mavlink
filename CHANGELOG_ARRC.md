@@ -18,6 +18,8 @@ needs no change; my-ardupilot and RFSonde_GUI move together.
   marks a run where an angle had no attitude report. The dwell (param5) is in whole seconds.
 - `ARRC_DPHASE_STEP.time_boot_ms` is the time of sending and `end_ms` the end of the averaging: a GCS that
   takes a backwards `time_boot_ms` for an autopilot reboot (Ludifly) is not fooled by a step sent again.
+- The sweep runs in parallel planes (`MNT1_ARRC_GMODE 1`): the probe faces along the AUT boresight and turns about
+  it; `MNT1_ARRC_POFF` is not used (descriptions only).
 
 ## 2026-11-17: USB 3 flag
 

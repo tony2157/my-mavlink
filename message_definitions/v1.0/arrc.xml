@@ -347,9 +347,9 @@
         <param index="7">Empty.</param>
       </entry>
       <entry value="47006" name="MAV_CMD_ARRC_DPHASE" hasLocation="false" isDestination="false">
-        <description>Start or stop the autopilot's transmit differential phase sweep: the gimbal turns the probe about its boresight from -span to +span (and back) in Hpol-aligned mode (MNT1_ARRC_GMODE 2), averages the RF power at each angle and fits it. Progress in ARRC_DPHASE_STATUS and ARRC_DPHASE_STEP. Denied with a STATUSTEXT that gives the reason (ARRC_DPHASE_REASON).</description>
+        <description>Start or stop the autopilot's transmit differential phase sweep: in parallel planes (MNT1_ARRC_GMODE 1) the probe faces along the AUT boresight (MNT1_ARRC_AZTH, pitch -MNT1_ARRC_ELEV) and the gimbal turns it about that boresight from -span to +span (and back), averages the RF power at each angle and fits it. MNT1_ARRC_POFF is not used. Progress in ARRC_DPHASE_STATUS and ARRC_DPHASE_STEP. Denied with a STATUSTEXT that gives the reason (ARRC_DPHASE_REASON).</description>
         <param index="1" label="Action" enum="ARRC_DPHASE_ACTION">Action.</param>
-        <param index="2" label="Span" units="deg" minValue="0" maxValue="55">Half span: angles from -span to +span from H (0 = 55).</param>
+        <param index="2" label="Span" units="deg" minValue="0" maxValue="55">Half span: angles from -span to +span from the AUT y axis (0 = 55).</param>
         <param index="3" label="Step" units="deg" minValue="0" maxValue="30">Angle step (0 = 10).</param>
         <param index="4" label="Settle" units="s" minValue="0" maxValue="30">Wait after each move before averaging (0 = 3); the first move waits 2 s more.</param>
         <param index="5" label="Dwell" units="s" minValue="0" maxValue="60" increment="1">Averaging time at each angle, whole seconds (0 = 5). The autopilot reads params 5 and 6 as the integer x and y of COMMAND_INT.</param>
@@ -393,7 +393,7 @@
     </enum>
     <enum name="ARRC_DPHASE_ACTION">
       <description>MAV_CMD_ARRC_DPHASE action.</description>
-      <entry value="0" name="ARRC_DPHASE_ACTION_STOP"><description>Stop the sweep and put MNT1_ARRC_POFF back.</description></entry>
+      <entry value="0" name="ARRC_DPHASE_ACTION_STOP"><description>Stop the sweep; the probe goes back to the plain parallel-planes attitude.</description></entry>
       <entry value="1" name="ARRC_DPHASE_ACTION_START"><description>Start a sweep with the settings in param2-param6.</description></entry>
     </enum>
     <enum name="ARRC_DPHASE_OPTIONS" bitmask="true">
@@ -406,15 +406,15 @@
       <entry value="1" name="ARRC_DPHASE_STATE_MOVING"><description>Turning the probe to the next angle and waiting for it to settle.</description></entry>
       <entry value="2" name="ARRC_DPHASE_STATE_SAMPLING"><description>Averaging the RF power at the angle.</description></entry>
       <entry value="3" name="ARRC_DPHASE_STATE_DONE"><description>Finished: the result fields hold the fit.</description></entry>
-      <entry value="4" name="ARRC_DPHASE_STATE_STOPPED"><description>Stopped before a result; reason says why. MNT1_ARRC_POFF is back at its value from before the sweep.</description></entry>
+      <entry value="4" name="ARRC_DPHASE_STATE_STOPPED"><description>Stopped before a result; reason says why. The probe is back at the plain parallel-planes attitude.</description></entry>
     </enum>
     <enum name="ARRC_DPHASE_REASON">
       <description>Why a transmit differential phase sweep stopped or was not started.</description>
       <entry value="0" name="ARRC_DPHASE_REASON_NONE"><description>None.</description></entry>
       <entry value="1" name="ARRC_DPHASE_REASON_COMMAND"><description>Stopped by MAV_CMD_ARRC_DPHASE.</description></entry>
-      <entry value="2" name="ARRC_DPHASE_REASON_GIMBAL_MODE"><description>MNT1_ARRC_GMODE is not 2 (Hpol aligned).</description></entry>
-      <entry value="3" name="ARRC_DPHASE_REASON_NO_SOLUTION"><description>No Hpol pointing solution: no ROI at the AUT, another mount mode, ArduPilot pointing fallback, or closer than the minimum distance.</description></entry>
-      <entry value="4" name="ARRC_DPHASE_REASON_LIMIT"><description>Roll or pitch limit reached: the probe is not at the angle or not pointing at the AUT.</description></entry>
+      <entry value="2" name="ARRC_DPHASE_REASON_GIMBAL_MODE"><description>MNT1_ARRC_GMODE is not 1 (parallel planes).</description></entry>
+      <entry value="3" name="ARRC_DPHASE_REASON_NO_SOLUTION"><description>No parallel-planes pointing solution: no ROI at the AUT, another mount mode, ArduPilot pointing fallback, or closer than the minimum distance.</description></entry>
+      <entry value="4" name="ARRC_DPHASE_REASON_LIMIT"><description>Roll or pitch limit reached: the probe is not at the angle or not along the AUT boresight.</description></entry>
       <entry value="5" name="ARRC_DPHASE_REASON_RF_SOURCE"><description>No RF power reading (SDR or LB5900), or none for 1 s.</description></entry>
       <entry value="6" name="ARRC_DPHASE_REASON_FEW_SAMPLES"><description>Too few valid power readings at an angle.</description></entry>
       <entry value="7" name="ARRC_DPHASE_REASON_VEHICLE"><description>Armed in a mode other than Loiter, PosHold, Guided or Auto, or a failsafe.</description></entry>
@@ -737,7 +737,7 @@
       <field type="float" name="swing" units="dB">Peak to null ratio of the fitted power curve (NaN without a result).</field>
       <field type="float" name="peak_angle" units="deg">Probe angle of the fitted power peak, -90 to 90 (NaN without a result).</field>
       <field type="float" name="fit_r">Correlation coefficient between the readings and the fitted curve (NaN without a result).</field>
-      <field type="float" name="psi" units="deg">Probe angle commanded now (MNT1_ARRC_POFF during the sweep); NaN when not running.</field>
+      <field type="float" name="psi" units="deg">Probe angle about the boresight commanded now, from the AUT y axis toward up; NaN when not running.</field>
       <field type="float" name="span" units="deg">Half span of the run.</field>
       <field type="float" name="step_deg" units="deg">Angle step of the run.</field>
       <field type="float" name="settle" units="s">Settle time of the run.</field>
@@ -753,7 +753,7 @@
       <description>One angle of a transmit differential phase sweep, sent once when its averaging ends to the links that stream ARRC_DPHASE_STATUS, and on request (MAV_CMD_REQUEST_MESSAGE param2 = step index of the current or last run). Outside the dialect hash (47000-47019): the companion does not use it.</description>
       <field type="uint32_t" name="time_boot_ms" units="ms">Timestamp (time since system boot) of sending; a step sent again on request carries the time it was sent.</field>
       <field type="uint32_t" name="end_ms" units="ms">End of the averaging (time since system boot).</field>
-      <field type="float" name="psi" units="deg">Commanded probe angle from H (MNT1_ARRC_POFF).</field>
+      <field type="float" name="psi" units="deg">Commanded probe angle about the boresight, from the AUT y axis toward up.</field>
       <field type="float" name="psi_meas" units="deg">Measured probe angle about the commanded boresight: the commanded angle plus the mean polarisation error of the gimbal's reported attitude during the averaging. The fit uses it (the commanded angle when NaN: the gimbal did not report).</field>
       <field type="float" name="power" units="dBm">Mean power of the valid readings, averaged in mW.</field>
       <field type="float" name="power_sd" units="dB">Standard deviation of the valid readings.</field>
