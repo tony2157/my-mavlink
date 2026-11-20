@@ -13,9 +13,11 @@ needs no change; my-ardupilot and RFSonde_GUI move together.
   boresight in Hpol-aligned mode, with span, step, settle, dwell and options (`ARRC_DPHASE_*` enums).
 - `ARRC_DPHASE_STATUS` (47020, `crc_extra` 131): state, settings and result (abs(beta), its sigma,
   ZDR_tx, swing, peak angle, R).
-- `ARRC_DPHASE_STEP` (47021, `crc_extra` 39): one per averaged angle; a missing one is requested by index.
+- `ARRC_DPHASE_STEP` (47021): one per averaged angle; a missing one is requested by index.
 - The fit uses the gimbal's measured angle about the boresight (`psi_meas`); `ARRC_DPHASE_FLAGS_COMMANDED_ANGLE`
   marks a run where an angle had no attitude report. The dwell (param5) is in whole seconds.
+- `ARRC_DPHASE_STEP.time_boot_ms` is the time of sending and `end_ms` the end of the averaging: a GCS that
+  takes a backwards `time_boot_ms` for an autopilot reboot (Ludifly) is not fooled by a step sent again.
 
 ## 2026-11-17: USB 3 flag
 

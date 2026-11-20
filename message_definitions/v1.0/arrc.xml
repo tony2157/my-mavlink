@@ -746,12 +746,13 @@
       <field type="uint16_t" name="flags" enum="ARRC_DPHASE_FLAGS" display="bitmask">Flags.</field>
       <field type="uint8_t" name="state" enum="ARRC_DPHASE_STATE">State.</field>
       <field type="uint8_t" name="reason" enum="ARRC_DPHASE_REASON">Why the run stopped (STOPPED).</field>
-      <field type="uint8_t" name="step">Index of the current angle, 0 to n_steps - 1.</field>
+      <field type="uint8_t" name="step">Index of the current angle, 0 to n_steps - 1, while running; the number of angles averaged once the run has ended.</field>
       <field type="uint8_t" name="n_steps">Angles in the run, the way back included.</field>
     </message>
     <message id="47021" name="ARRC_DPHASE_STEP">
       <description>One angle of a transmit differential phase sweep, sent once when its averaging ends to the links that stream ARRC_DPHASE_STATUS, and on request (MAV_CMD_REQUEST_MESSAGE param2 = step index of the current or last run). Outside the dialect hash (47000-47019): the companion does not use it.</description>
-      <field type="uint32_t" name="time_boot_ms" units="ms">End of the averaging (time since system boot).</field>
+      <field type="uint32_t" name="time_boot_ms" units="ms">Timestamp (time since system boot) of sending; a step sent again on request carries the time it was sent.</field>
+      <field type="uint32_t" name="end_ms" units="ms">End of the averaging (time since system boot).</field>
       <field type="float" name="psi" units="deg">Commanded probe angle from H (MNT1_ARRC_POFF).</field>
       <field type="float" name="psi_meas" units="deg">Measured probe angle about the commanded boresight: the commanded angle plus the mean polarisation error of the gimbal's reported attitude during the averaging. The fit uses it (the commanded angle when NaN: the gimbal did not report).</field>
       <field type="float" name="power" units="dBm">Mean power of the valid readings, averaged in mW.</field>
