@@ -352,7 +352,7 @@
         <param index="2" label="Span" units="deg" minValue="0" maxValue="55">Half span: angles from -span to +span from H (0 = 55).</param>
         <param index="3" label="Step" units="deg" minValue="0" maxValue="30">Angle step (0 = 10).</param>
         <param index="4" label="Settle" units="s" minValue="0" maxValue="30">Wait after each move before averaging (0 = 3); the first move waits 2 s more.</param>
-        <param index="5" label="Dwell" units="s" minValue="0" maxValue="60">Averaging time at each angle (0 = 5).</param>
+        <param index="5" label="Dwell" units="s" minValue="0" maxValue="60" increment="1">Averaging time at each angle, whole seconds (0 = 5). The autopilot reads params 5 and 6 as the integer x and y of COMMAND_INT.</param>
         <param index="6" label="Options" enum="ARRC_DPHASE_OPTIONS">Options bitmask.</param>
         <param index="7">Empty.</param>
       </entry>
@@ -432,6 +432,7 @@
       <entry value="8" name="ARRC_DPHASE_FLAGS_COS_CLAMPED"><description>The fit gave abs(cos beta) above 1 (noise or a systematic error): beta is reported as 0 or 180 deg and beta_sigma is NaN.</description></entry>
       <entry value="16" name="ARRC_DPHASE_FLAGS_NEAR_CLIP"><description>An angle averaged readings with ARRC_MEAS_FLAGS_NEAR_CLIP.</description></entry>
       <entry value="32" name="ARRC_DPHASE_FLAGS_PREDICTED"><description>An angle averaged readings with predicted (undetected) pulses.</description></entry>
+      <entry value="64" name="ARRC_DPHASE_FLAGS_COMMANDED_ANGLE"><description>An angle had no attitude report from the gimbal: the fit used its commanded angle there instead of the measured one.</description></entry>
     </enum>
   </enums>
   <messages>
@@ -752,7 +753,7 @@
       <description>One angle of a transmit differential phase sweep, sent once when its averaging ends to the links that stream ARRC_DPHASE_STATUS, and on request (MAV_CMD_REQUEST_MESSAGE param2 = step index of the current or last run). Outside the dialect hash (47000-47019): the companion does not use it.</description>
       <field type="uint32_t" name="time_boot_ms" units="ms">End of the averaging (time since system boot).</field>
       <field type="float" name="psi" units="deg">Commanded probe angle from H (MNT1_ARRC_POFF).</field>
-      <field type="float" name="psi_meas" units="deg">Commanded angle plus the mean polarisation error the gimbal's measured attitude gave during the averaging (NaN if the gimbal does not report it).</field>
+      <field type="float" name="psi_meas" units="deg">Measured probe angle about the commanded boresight: the commanded angle plus the mean polarisation error of the gimbal's reported attitude during the averaging. The fit uses it (the commanded angle when NaN: the gimbal did not report).</field>
       <field type="float" name="power" units="dBm">Mean power of the valid readings, averaged in mW.</field>
       <field type="float" name="power_sd" units="dB">Standard deviation of the valid readings.</field>
       <field type="uint16_t" name="n_samples">Valid readings averaged.</field>

@@ -14,6 +14,8 @@ needs no change; my-ardupilot and RFSonde_GUI move together.
 - `ARRC_DPHASE_STATUS` (47020, `crc_extra` 131): state, settings and result (abs(beta), its sigma,
   ZDR_tx, swing, peak angle, R).
 - `ARRC_DPHASE_STEP` (47021, `crc_extra` 39): one per averaged angle; a missing one is requested by index.
+- The fit uses the gimbal's measured angle about the boresight (`psi_meas`); `ARRC_DPHASE_FLAGS_COMMANDED_ANGLE`
+  marks a run where an angle had no attitude report. The dwell (param5) is in whole seconds.
 
 ## 2026-11-17: USB 3 flag
 
