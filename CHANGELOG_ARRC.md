@@ -4,6 +4,17 @@ Dialect commits on `ArduPilot-4.7-ARRC-SDR` that touch `message_definitions/v1.0
 (`git log --oneline origin/ArduPilot-4.7-ARRC..ArduPilot-4.7-ARRC-SDR -- message_definitions/v1.0/arrc.xml`),
 newest first, with the dialect hash after each (see `README_ARRC.md` for the rule).
 
+## Branch `ArduPilot-4.7-ARRC-SDR-dphase` (2026-11-19): transmit differential phase sweep
+
+New messages outside the hashed range and a new command; hash unchanged, `0x7EFB3788`. The companion
+needs no change; my-ardupilot and RFSonde_GUI move together.
+
+- `MAV_CMD_ARRC_DPHASE` (47006): start or stop the autopilot's sweep of the probe angle about its
+  boresight in Hpol-aligned mode, with span, step, settle, dwell and options (`ARRC_DPHASE_*` enums).
+- `ARRC_DPHASE_STATUS` (47020, `crc_extra` 131): state, settings and result (abs(beta), its sigma,
+  ZDR_tx, swing, peak angle, R).
+- `ARRC_DPHASE_STEP` (47021, `crc_extra` 39): one per averaged angle; a missing one is requested by index.
+
 ## 2026-11-17: USB 3 flag
 
 Enum entry only; hash unchanged, `0x7EFB3788`. A companion that does not set it reads as USB 2 or not known.

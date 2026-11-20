@@ -16,7 +16,8 @@ the measurement feed.
 | Block | Where defined | Content |
 |---|---|---|
 | Messages 47000-47019 | `arrc.xml` | Reserved for ARRC. Defined: 47000 `ARRC_CC_STATUS`, 47001 `ARRC_SDR_STATUS`, 47002 `ARRC_SDR_CONFIG`, 47003 `ARRC_SDR_MEAS_CONFIG`, 47004 `ARRC_SDR_MEAS`, 47005 `ARRC_SDR_TRACE`, 47006 `ARRC_SCRIPT_INFO`, 47007 `ARRC_WAVEFORM_INFO`, 47008 `ARRC_PORT_INFO`, 47009 `ARRC_NAV_IMU`, 47010 `ARRC_NAV_MAG`, 47011 `ARRC_NAV_BARO`, 47012 `ARRC_NAV_GPS`, 47013 `ARRC_NAV_ECEF`, 47014 `ARRC_GIMBAL_POINTING`. 47015-47019 are free. |
-| `MAV_CMD` 47000-47009 | `arrc.xml` (extends the `MAV_CMD` enum of `common.xml`) | Reserved for ARRC. Defined: 47000 `MAV_CMD_ARRC_SDR_CONTROL`, 47001 `MAV_CMD_ARRC_TX_ARM`, 47002 `MAV_CMD_ARRC_SCRIPT`, 47003 `MAV_CMD_ARRC_RECORD`, 47004 `MAV_CMD_ARRC_PROFILE`, 47005 `MAV_CMD_ARRC_WAVEFORM_GEN`. 47006-47009 are free. |
+| Messages 47020-47029 | `arrc.xml` | Autopilot procedures, autopilot to GCS; the companion does not use them and they are outside the dialect hash. Defined: 47020 `ARRC_DPHASE_STATUS`, 47021 `ARRC_DPHASE_STEP`. 47022-47029 are free. |
+| `MAV_CMD` 47000-47009 | `arrc.xml` (extends the `MAV_CMD` enum of `common.xml`) | Reserved for ARRC. Defined: 47000 `MAV_CMD_ARRC_SDR_CONTROL`, 47001 `MAV_CMD_ARRC_TX_ARM`, 47002 `MAV_CMD_ARRC_SCRIPT`, 47003 `MAV_CMD_ARRC_RECORD`, 47004 `MAV_CMD_ARRC_PROFILE`, 47005 `MAV_CMD_ARRC_WAVEFORM_GEN`, 47006 `MAV_CMD_ARRC_DPHASE` (autopilot). 47007-47009 are free. |
 | Message 228 `ARRC_SENSOR_RAW` | `arrc.xml` | The RF measurement downlink, autopilot to GCS. It was added to `ardupilotmega.xml` in `ab4355ca` and moved to `arrc.xml` in `1499dbf3`, which added the extension fields `snr_db`, `flags` and `n_avg`; its `crc_extra` (166) did not change. |
 | Message 227 `CASS_SENSOR_RAW` | `ardupilotmega.xml` | The BLISS/CASS raw sensor message (LB5900 power as `app_datatype` 4 in Ludifly). Not part of the ARRC dialect and not covered by the dialect hash. |
 
@@ -83,6 +84,8 @@ Rules:
 
 - A change that alters any `crc_extra` (a new message, a new or changed non-extension field) changes
   the dialect hash: bump the three consumers together, or the companion and Ludifly refuse each other.
+- The hash covers 228 and 47000-47019 only. Messages at 47020-47029 are between the autopilot and the GCS:
+  adding one leaves the hash alone, so my-ardupilot and RFSonde_GUI can move without the companion.
 - Extension fields (after `<extensions/>`) keep the `crc_extra` and the hash: an updated side reads the
   new fields, the others zero-fill or ignore them, so the consumers can be bumped one at a time.
 - Documentation-only changes (descriptions) change nothing on the wire; the pins stay valid.

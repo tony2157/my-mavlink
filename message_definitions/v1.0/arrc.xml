@@ -346,6 +346,16 @@
         <param index="6">Empty.</param>
         <param index="7">Empty.</param>
       </entry>
+      <entry value="47006" name="MAV_CMD_ARRC_DPHASE" hasLocation="false" isDestination="false">
+        <description>Start or stop the autopilot's transmit differential phase sweep: the gimbal turns the probe about its boresight from -span to +span (and back) in Hpol-aligned mode (MNT1_ARRC_GMODE 2), averages the RF power at each angle and fits it. Progress in ARRC_DPHASE_STATUS and ARRC_DPHASE_STEP. Denied with a STATUSTEXT that gives the reason (ARRC_DPHASE_REASON).</description>
+        <param index="1" label="Action" enum="ARRC_DPHASE_ACTION">Action.</param>
+        <param index="2" label="Span" units="deg" minValue="0" maxValue="55">Half span: angles from -span to +span from H (0 = 55).</param>
+        <param index="3" label="Step" units="deg" minValue="0" maxValue="30">Angle step (0 = 10).</param>
+        <param index="4" label="Settle" units="s" minValue="0" maxValue="30">Wait after each move before averaging (0 = 3); the first move waits 2 s more.</param>
+        <param index="5" label="Dwell" units="s" minValue="0" maxValue="60">Averaging time at each angle (0 = 5).</param>
+        <param index="6" label="Options" enum="ARRC_DPHASE_OPTIONS">Options bitmask.</param>
+        <param index="7">Empty.</param>
+      </entry>
     </enum>
     <enum name="ARRC_REC_TRIGGER">
       <description>What started the recording in progress.</description>
@@ -380,6 +390,48 @@
       <entry value="1" name="ARRC_GIMBAL_FLAGS_ROLL_LIMIT"><description>Roll limited: pointing at the AUT, polarisation not aligned.</description></entry>
       <entry value="2" name="ARRC_GIMBAL_FLAGS_PITCH_LIMIT"><description>Pitch limited: not pointing at the AUT.</description></entry>
       <entry value="4" name="ARRC_GIMBAL_FLAGS_TOO_CLOSE"><description>Closer than the minimum distance: holding the last target.</description></entry>
+    </enum>
+    <enum name="ARRC_DPHASE_ACTION">
+      <description>MAV_CMD_ARRC_DPHASE action.</description>
+      <entry value="0" name="ARRC_DPHASE_ACTION_STOP"><description>Stop the sweep and put MNT1_ARRC_POFF back.</description></entry>
+      <entry value="1" name="ARRC_DPHASE_ACTION_START"><description>Start a sweep with the settings in param2-param6.</description></entry>
+    </enum>
+    <enum name="ARRC_DPHASE_OPTIONS" bitmask="true">
+      <description>Transmit differential phase sweep options.</description>
+      <entry value="1" name="ARRC_DPHASE_OPTIONS_ONE_WAY"><description>Sweep once from -span to +span. Without it the sweep comes back to -span, which cancels a linear drift of the radar power.</description></entry>
+    </enum>
+    <enum name="ARRC_DPHASE_STATE">
+      <description>State of the transmit differential phase sweep.</description>
+      <entry value="0" name="ARRC_DPHASE_STATE_IDLE"><description>No sweep since boot.</description></entry>
+      <entry value="1" name="ARRC_DPHASE_STATE_MOVING"><description>Turning the probe to the next angle and waiting for it to settle.</description></entry>
+      <entry value="2" name="ARRC_DPHASE_STATE_SAMPLING"><description>Averaging the RF power at the angle.</description></entry>
+      <entry value="3" name="ARRC_DPHASE_STATE_DONE"><description>Finished: the result fields hold the fit.</description></entry>
+      <entry value="4" name="ARRC_DPHASE_STATE_STOPPED"><description>Stopped before a result; reason says why. MNT1_ARRC_POFF is back at its value from before the sweep.</description></entry>
+    </enum>
+    <enum name="ARRC_DPHASE_REASON">
+      <description>Why a transmit differential phase sweep stopped or was not started.</description>
+      <entry value="0" name="ARRC_DPHASE_REASON_NONE"><description>None.</description></entry>
+      <entry value="1" name="ARRC_DPHASE_REASON_COMMAND"><description>Stopped by MAV_CMD_ARRC_DPHASE.</description></entry>
+      <entry value="2" name="ARRC_DPHASE_REASON_GIMBAL_MODE"><description>MNT1_ARRC_GMODE is not 2 (Hpol aligned).</description></entry>
+      <entry value="3" name="ARRC_DPHASE_REASON_NO_SOLUTION"><description>No Hpol pointing solution: no ROI at the AUT, another mount mode, ArduPilot pointing fallback, or closer than the minimum distance.</description></entry>
+      <entry value="4" name="ARRC_DPHASE_REASON_LIMIT"><description>Roll or pitch limit reached: the probe is not at the angle or not pointing at the AUT.</description></entry>
+      <entry value="5" name="ARRC_DPHASE_REASON_RF_SOURCE"><description>No RF power reading (SDR or LB5900), or none for 1 s.</description></entry>
+      <entry value="6" name="ARRC_DPHASE_REASON_FEW_SAMPLES"><description>Too few valid power readings at an angle.</description></entry>
+      <entry value="7" name="ARRC_DPHASE_REASON_VEHICLE"><description>Armed in a mode other than Loiter, PosHold, Guided or Auto, or a failsafe.</description></entry>
+      <entry value="8" name="ARRC_DPHASE_REASON_ALIGNMENT"><description>The gimbal alignment is running.</description></entry>
+      <entry value="9" name="ARRC_DPHASE_REASON_FIT"><description>The fit failed: no usable power variation.</description></entry>
+      <entry value="10" name="ARRC_DPHASE_REASON_SETTINGS"><description>A setting is out of range or the sweep has too many angles.</description></entry>
+      <entry value="11" name="ARRC_DPHASE_REASON_GIMBAL"><description>The gimbal did not reach the angle (measured polarisation error over 3 deg after settling).</description></entry>
+      <entry value="12" name="ARRC_DPHASE_REASON_BUSY"><description>A sweep is already running.</description></entry>
+    </enum>
+    <enum name="ARRC_DPHASE_FLAGS" bitmask="true">
+      <description>Transmit differential phase sweep flags.</description>
+      <entry value="1" name="ARRC_DPHASE_FLAGS_RESULT"><description>The result fields hold the fit of this run.</description></entry>
+      <entry value="2" name="ARRC_DPHASE_FLAGS_SDR"><description>Power from the SDR co-pol channel; else from the LB5900.</description></entry>
+      <entry value="4" name="ARRC_DPHASE_FLAGS_ONE_WAY"><description>One-way sweep (ARRC_DPHASE_OPTIONS_ONE_WAY).</description></entry>
+      <entry value="8" name="ARRC_DPHASE_FLAGS_COS_CLAMPED"><description>The fit gave abs(cos beta) above 1 (noise or a systematic error): beta is reported as 0 or 180 deg and beta_sigma is NaN.</description></entry>
+      <entry value="16" name="ARRC_DPHASE_FLAGS_NEAR_CLIP"><description>An angle averaged readings with ARRC_MEAS_FLAGS_NEAR_CLIP.</description></entry>
+      <entry value="32" name="ARRC_DPHASE_FLAGS_PREDICTED"><description>An angle averaged readings with predicted (undetected) pulses.</description></entry>
     </enum>
   </enums>
   <messages>
@@ -674,6 +726,41 @@
       <field type="uint64_t" name="meas_usec" units="us">Autopilot boot time the autopilot received that status. 0 if none. Repeated values are the same status sent again.</field>
       <field type="uint32_t" name="gimbal_time_ms" units="ms">The status's own time_boot_ms (the gimbal's clock).</field>
       <field type="uint16_t" name="gimbal_flags" enum="GIMBAL_DEVICE_FLAGS" display="bitmask">The status's flags.</field>
+    </message>
+    <message id="47020" name="ARRC_DPHASE_STATUS">
+      <description>Transmit differential phase sweep (MAV_CMD_ARRC_DPHASE): state, settings and result. Autopilot to GCS, at the interval a link sets with MAV_CMD_SET_MESSAGE_INTERVAL, on each state change to those links, and on request. beta is in the convention H to the left and V up seen from behind the radar looking along the beam; with the opposite polarity of H (or V) it is 180 - beta. Outside the dialect hash (47000-47019): the companion does not use it.</description>
+      <field type="uint32_t" name="time_boot_ms" units="ms">Timestamp (time since system boot).</field>
+      <field type="float" name="beta" units="deg">Transmit differential phase magnitude abs(beta), 0 to 180 (NaN without a result).</field>
+      <field type="float" name="beta_sigma" units="deg">Standard error of beta from the fit residuals (NaN without a result or when clamped).</field>
+      <field type="float" name="zdr_tx" units="dB">Transmit H to V power ratio at the probe, 10 log10(Eh^2/Ev^2) (NaN without a result).</field>
+      <field type="float" name="swing" units="dB">Peak to null ratio of the fitted power curve (NaN without a result).</field>
+      <field type="float" name="peak_angle" units="deg">Probe angle of the fitted power peak, -90 to 90 (NaN without a result).</field>
+      <field type="float" name="fit_r">Correlation coefficient between the readings and the fitted curve (NaN without a result).</field>
+      <field type="float" name="psi" units="deg">Probe angle commanded now (MNT1_ARRC_POFF during the sweep); NaN when not running.</field>
+      <field type="float" name="span" units="deg">Half span of the run.</field>
+      <field type="float" name="step_deg" units="deg">Angle step of the run.</field>
+      <field type="float" name="settle" units="s">Settle time of the run.</field>
+      <field type="float" name="dwell" units="s">Averaging time of the run.</field>
+      <field type="uint16_t" name="run_id">Run counter since boot (0 before the first run).</field>
+      <field type="uint16_t" name="flags" enum="ARRC_DPHASE_FLAGS" display="bitmask">Flags.</field>
+      <field type="uint8_t" name="state" enum="ARRC_DPHASE_STATE">State.</field>
+      <field type="uint8_t" name="reason" enum="ARRC_DPHASE_REASON">Why the run stopped (STOPPED).</field>
+      <field type="uint8_t" name="step">Index of the current angle, 0 to n_steps - 1.</field>
+      <field type="uint8_t" name="n_steps">Angles in the run, the way back included.</field>
+    </message>
+    <message id="47021" name="ARRC_DPHASE_STEP">
+      <description>One angle of a transmit differential phase sweep, sent once when its averaging ends to the links that stream ARRC_DPHASE_STATUS, and on request (MAV_CMD_REQUEST_MESSAGE param2 = step index of the current or last run). Outside the dialect hash (47000-47019): the companion does not use it.</description>
+      <field type="uint32_t" name="time_boot_ms" units="ms">End of the averaging (time since system boot).</field>
+      <field type="float" name="psi" units="deg">Commanded probe angle from H (MNT1_ARRC_POFF).</field>
+      <field type="float" name="psi_meas" units="deg">Commanded angle plus the mean polarisation error the gimbal's measured attitude gave during the averaging (NaN if the gimbal does not report it).</field>
+      <field type="float" name="power" units="dBm">Mean power of the valid readings, averaged in mW.</field>
+      <field type="float" name="power_sd" units="dB">Standard deviation of the valid readings.</field>
+      <field type="uint16_t" name="n_samples">Valid readings averaged.</field>
+      <field type="uint16_t" name="n_rejected">Readings rejected for their flags (saturated, overrun, waveform mismatch, transmitting).</field>
+      <field type="uint16_t" name="meas_flags" enum="ARRC_MEAS_FLAGS" display="bitmask">Flags of the averaged readings, ORed (SDR only).</field>
+      <field type="uint16_t" name="run_id">Run counter (ARRC_DPHASE_STATUS.run_id).</field>
+      <field type="uint8_t" name="step">Index of this angle, 0 to n_steps - 1.</field>
+      <field type="uint8_t" name="n_steps">Angles in the run.</field>
     </message>
   </messages>
 </mavlink>
