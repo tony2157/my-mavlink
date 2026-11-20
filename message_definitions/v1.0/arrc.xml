@@ -347,7 +347,7 @@
         <param index="7">Empty.</param>
       </entry>
       <entry value="47006" name="MAV_CMD_ARRC_DPHASE" hasLocation="false" isDestination="false">
-        <description>Start or stop the autopilot's transmit differential phase sweep: in parallel planes (MNT1_ARRC_GMODE 1) the probe faces along the AUT boresight (MNT1_ARRC_AZTH, pitch -MNT1_ARRC_ELEV) and the gimbal turns it about that boresight from -span to +span (and back), averages the RF power at each angle and fits it. MNT1_ARRC_POFF is not used. Progress in ARRC_DPHASE_STATUS and ARRC_DPHASE_STEP. Denied with a STATUSTEXT that gives the reason (ARRC_DPHASE_REASON).</description>
+        <description>Start or stop the autopilot's transmit differential phase sweep: the autopilot switches the gimbal to parallel planes (MNT1_ARRC_GMODE 1, not saved) and back to its mode at the end; the probe faces along the AUT boresight (MNT1_ARRC_AZTH, pitch -MNT1_ARRC_ELEV) and the gimbal turns it about that boresight from -span to +span (and back), averages the RF power at each angle and fits it. MNT1_ARRC_POFF is not used. Needs the mount pointing at the AUT (ROI). Progress in ARRC_DPHASE_STATUS and ARRC_DPHASE_STEP. Denied with a STATUSTEXT that gives the reason (ARRC_DPHASE_REASON).</description>
         <param index="1" label="Action" enum="ARRC_DPHASE_ACTION">Action.</param>
         <param index="2" label="Span" units="deg" minValue="0" maxValue="55">Half span: angles from -span to +span from the AUT y axis (0 = 55).</param>
         <param index="3" label="Step" units="deg" minValue="0" maxValue="30">Angle step (0 = 10).</param>
@@ -412,7 +412,7 @@
       <description>Why a transmit differential phase sweep stopped or was not started.</description>
       <entry value="0" name="ARRC_DPHASE_REASON_NONE"><description>None.</description></entry>
       <entry value="1" name="ARRC_DPHASE_REASON_COMMAND"><description>Stopped by MAV_CMD_ARRC_DPHASE.</description></entry>
-      <entry value="2" name="ARRC_DPHASE_REASON_GIMBAL_MODE"><description>MNT1_ARRC_GMODE is not 1 (parallel planes).</description></entry>
+      <entry value="2" name="ARRC_DPHASE_REASON_GIMBAL_MODE"><description>MNT1_ARRC_GMODE was set to another mode during the sweep (that mode is kept), or is invalid.</description></entry>
       <entry value="3" name="ARRC_DPHASE_REASON_NO_SOLUTION"><description>No parallel-planes pointing solution: no ROI at the AUT, another mount mode, ArduPilot pointing fallback, or closer than the minimum distance.</description></entry>
       <entry value="4" name="ARRC_DPHASE_REASON_LIMIT"><description>Roll or pitch limit reached: the probe is not at the angle or not along the AUT boresight.</description></entry>
       <entry value="5" name="ARRC_DPHASE_REASON_RF_SOURCE"><description>No RF power reading (SDR or LB5900), or none for 1 s.</description></entry>

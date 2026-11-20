@@ -20,6 +20,8 @@ needs no change; my-ardupilot and RFSonde_GUI move together.
   takes a backwards `time_boot_ms` for an autopilot reboot (Ludifly) is not fooled by a step sent again.
 - The sweep runs in parallel planes (`MNT1_ARRC_GMODE 1`): the probe faces along the AUT boresight and turns about
   it; `MNT1_ARRC_POFF` is not used (descriptions only).
+- The autopilot switches to `MNT1_ARRC_GMODE 1` for the sweep and back to the previous mode at its end; a mode
+  set during the sweep stops it and is kept (descriptions only).
 
 ## 2026-11-17: USB 3 flag
 
