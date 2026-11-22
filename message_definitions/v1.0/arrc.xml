@@ -46,10 +46,10 @@
       <entry value="32" name="ARRC_SDR_FLAGS_RECORDING"><description>Recording to the data disk.</description></entry>
       <entry value="64" name="ARRC_SDR_FLAGS_REF_LOCKED"><description>Device PLL locked to the external 10 MHz reference (clock_ref EXT_10MHZ).</description></entry>
       <entry value="128" name="ARRC_SDR_FLAGS_OVERRUN"><description>Overrun in the last status period.</description></entry>
-      <entry value="256" name="ARRC_SDR_FLAGS_SATURATED"><description>Clipping in the last status period: the I/Q envelope reached -5 dBFS. On the RX chain the envelope is 1 dB over a pulse's power, so this is the -6 dBFS clip onset measured in flight; single I or Q samples stay below full scale when the converter clips.</description></entry>
+      <entry value="256" name="ARRC_SDR_FLAGS_SATURATED"><description>Clipping in the last status period: the I/Q envelope reached -5 dBFS on RX FIR DEC1, -0.75 dBFS on DEC2 (ARRC_RX_FIR: DEC2 reads 4.25 dB more). On DEC1 the envelope is 1 dB over a pulse's power, so this is the -6 dBFS clip onset measured in flight; single I or Q samples stay below full scale when the converter clips.</description></entry>
       <entry value="512" name="ARRC_SDR_FLAGS_PRI_LOCKED"><description>Pulse repetition tracker locked.</description></entry>
       <entry value="1024" name="ARRC_SDR_FLAGS_SIMULATED"><description>Simulated device (no hardware).</description></entry>
-      <entry value="2048" name="ARRC_SDR_FLAGS_NEAR_CLIP"><description>Near clipping in the last status period: the I/Q envelope reached -9 dBFS but not -5 dBFS.</description></entry>
+      <entry value="2048" name="ARRC_SDR_FLAGS_NEAR_CLIP"><description>Near clipping in the last status period: the I/Q envelope reached -9 dBFS but not -5 dBFS on RX FIR DEC1 (-4.75 and -0.75 dBFS on DEC2).</description></entry>
       <entry value="4096" name="ARRC_SDR_FLAGS_USB3"><description>SDR on a USB 3 SuperSpeed link. Clear: USB 2 High Speed (about 45 MB/s of samples) or not known.</description></entry>
     </enum>
     <enum name="ARRC_SDR_MODE">
@@ -132,6 +132,14 @@
       <entry value="1" name="ARRC_SAMPLE_FMT_SC8_Q7"><description>The top 8 of the 12 bits of I and Q, full scale 128: 2 bytes per sample on the USB.</description></entry>
       <entry value="2" name="ARRC_SAMPLE_FMT_SC16_Q11_PACKED"><description>All 12 bits of I and Q packed in 3 bytes per sample on the USB, full scale 2048; recorded as SC16_Q11. Needs FPGA 0.16 and libbladeRF 2.6. RX only for now.</description></entry>
     </enum>
+    <enum name="ARRC_RX_FIR">
+      <description>Digital FIR of the SDR's receive chain (AD9361). The FIRs differ in gain: the companion keeps the dBm on DEC1's scale and moves the clip levels with the FIR; raw dBFS are the samples'.</description>
+      <entry value="0" name="ARRC_RX_FIR_DEFAULT"><description>In a request: the companion's configured FIR. In an echo: a companion that does not report the FIR.</description></entry>
+      <entry value="1" name="ARRC_RX_FIR_DEC1"><description>libbladeRF's default, a flatness compensator with +9.8 dB at 0.465 x the sample rate (the noise hump near Nyquist). Used whenever a TX port has a role.</description></entry>
+      <entry value="2" name="ARRC_RX_FIR_DEC2"><description>Flat to +1.7 dB and 82 dB down past Nyquist; the same input reads 4.25 dB more than on DEC1. Receive only (it needs the TX FIR that interpolates by 2).</description></entry>
+      <entry value="3" name="ARRC_RX_FIR_DEC4"><description>Decimates by 4; libbladeRF's own below 2.083 MSPS, whatever is asked. Gain not measured: DEC1's levels apply.</description></entry>
+      <entry value="4" name="ARRC_RX_FIR_BYPASS"><description>No FIR. Gain not measured: DEC1's levels apply.</description></entry>
+    </enum>
     <enum name="ARRC_TX_TRIGGER">
       <description>When transmission starts once TX is armed; the companion implements FREE_RUN only.</description>
       <entry value="0" name="ARRC_TX_TRIGGER_FREE_RUN"><description>TX starts as soon as it is armed and the stream runs.</description></entry>
@@ -187,7 +195,7 @@
       <description>Flags of a measurement (ARRC_SDR_MEAS, ARRC_SENSOR_RAW).</description>
       <entry value="1" name="ARRC_MEAS_FLAGS_VALID"><description>pwr_c and phi_c are a measurement: pulses or samples were averaged and the power is above the noise.</description></entry>
       <entry value="2" name="ARRC_MEAS_FLAGS_XPOL_VALID"><description>pwr_x and phi_x are valid (an XPOL channel with power above the noise).</description></entry>
-      <entry value="4" name="ARRC_MEAS_FLAGS_SATURATED"><description>Clipping: the I/Q envelope reached -5 dBFS since the previous message.</description></entry>
+      <entry value="4" name="ARRC_MEAS_FLAGS_SATURATED"><description>Clipping: the I/Q envelope reached -5 dBFS on RX FIR DEC1 (-0.75 dBFS on DEC2) since the previous message.</description></entry>
       <entry value="8" name="ARRC_MEAS_FLAGS_OVERRUN"><description>Samples were lost (RX overrun) since the previous message.</description></entry>
       <entry value="16" name="ARRC_MEAS_FLAGS_TX_ACTIVE"><description>The companion was transmitting.</description></entry>
       <entry value="32" name="ARRC_MEAS_FLAGS_CAL_APPLIED"><description>A calibration table of the co-pol port converted dBFS to dBm.</description></entry>
@@ -198,7 +206,7 @@
       <entry value="1024" name="ARRC_MEAS_FLAGS_SIMULATED"><description>Simulated device, not RF.</description></entry>
       <entry value="2048" name="ARRC_MEAS_FLAGS_WF_MISMATCH"><description>The waveform filter found detections that the matched-filter template does not explain (another waveform or interference) since the previous message: excluded with wf_filter ENFORCE, still averaged with MONITOR.</description></entry>
       <entry value="4096" name="ARRC_MEAS_FLAGS_WF_FILTERED"><description>The waveform filter is enforcing (wf_filter ENFORCE): the power, phase and gated recording hold only pulses that match the template.</description></entry>
-      <entry value="8192" name="ARRC_MEAS_FLAGS_NEAR_CLIP"><description>Near clipping: the I/Q envelope reached -9 dBFS but not -5 dBFS since the previous message.</description></entry>
+      <entry value="8192" name="ARRC_MEAS_FLAGS_NEAR_CLIP"><description>Near clipping: the I/Q envelope reached -9 dBFS but not -5 dBFS on RX FIR DEC1 (-4.75 and -0.75 dBFS on DEC2) since the previous message.</description></entry>
     </enum>
     <enum name="ARRC_TRACE_TYPE">
       <description>Content of an ARRC_SDR_TRACE, requested with MAV_CMD_REQUEST_MESSAGE (param2 = trace type).</description>
@@ -526,6 +534,7 @@
       <field type="float[2]" name="rx_pad_db" units="dB">Attenuator (pad) at RX1 and RX2 (metadata, recorded; not applied to the reported power). Valid when its rx_setup_flags bit is set.</field>
       <field type="float[2]" name="rx_lna_db" units="dB">LNA gain ahead of RX1 and RX2 (metadata, recorded; not applied to the reported power). Valid when its rx_setup_flags bit is set.</field>
       <field type="uint8_t" name="rx_setup_flags" enum="ARRC_RX_SETUP_FLAGS" display="bitmask">Pad and LNA values entered; a clear bit is UNKNOWN (also what a sender without these fields gives).</field>
+      <field type="uint8_t" name="rx_fir" enum="ARRC_RX_FIR">RX FIR. Request: DEFAULT = the companion's configured one. Echo: the FIR in use (DEC1 when a TX port has a role, DEC4 below 2.083 MSPS); DEFAULT from a companion without the field. A change restarts the stream.</field>
     </message>
     <message id="47003" name="ARRC_SDR_MEAS_CONFIG">
       <description>Measurement and gated recording configuration. Sent by the GCS with op=SET; echoed with op=APPLIED.</description>

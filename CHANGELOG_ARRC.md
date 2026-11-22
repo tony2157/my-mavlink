@@ -4,6 +4,15 @@ Dialect commits on `ArduPilot-4.7-ARRC-SDR` that touch `message_definitions/v1.0
 (`git log --oneline origin/ArduPilot-4.7-ARRC..ArduPilot-4.7-ARRC-SDR -- message_definitions/v1.0/arrc.xml`),
 newest first, with the dialect hash after each (see `README_ARRC.md` for the rule).
 
+## 2026-11-22: RX FIR selection
+
+Extension field and a new enum; `crc_extra` and hash unchanged, `0x7EFB3788`. A sender without the field asks for
+the companion's configured FIR; a companion without it echoes DEFAULT.
+
+- `ARRC_RX_FIR` (DEFAULT, DEC1, DEC2, DEC4, BYPASS) and `ARRC_SDR_CONFIG.rx_fir` (125 B): the AD9361 receive FIR the
+  GCS asks for, and in the echo the one in use (DEC1 with a TX role, DEC4 below 2.083 MSPS).
+- The SATURATED and NEAR_CLIP descriptions give the DEC2 levels too (-0.75 and -4.75 dBFS).
+
 ## Branch `ArduPilot-4.7-ARRC-SDR-dphase` (2026-11-19): transmit differential phase sweep
 
 New messages outside the hashed range and a new command; hash unchanged, `0x7EFB3788`. The companion
