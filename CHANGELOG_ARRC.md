@@ -4,6 +4,17 @@ Dialect commits on `ArduPilot-4.7-ARRC-SDR` that touch `message_definitions/v1.0
 (`git log --oneline origin/ArduPilot-4.7-ARRC..ArduPilot-4.7-ARRC-SDR -- message_definitions/v1.0/arrc.xml`),
 newest first, with the dialect hash after each (see `README_ARRC.md` for the rule).
 
+## 2026-11-23: RX headroom in the SDR status, pad in the reported power
+
+Extension fields and a description; `crc_extra` and hash unchanged, `0x7EFB3788`. A companion without the fields
+sends zeros, which a GCS should take as "not known" only when all three are zero.
+
+- `ARRC_SDR_STATUS.peak_dbfs`, `near_clip_dbfs`, `clip_dbfs`: the highest RX envelope of the last second and the
+  NEAR_CLIP / SATURATED levels with the RX FIR in use, so the GCS can show the headroom left (the calibrated dBm do not
+  move with the RX gain; the headroom does).
+- `ARRC_SDR_CONFIG.rx_pad_db`: when entered, the companion counts the pad in the reported dBm in place of the port
+  profile's external attenuator (description only: the field is unchanged).
+
 ## 2026-11-22: RX FIR selection
 
 Extension field and a new enum; `crc_extra` and hash unchanged, `0x7EFB3788`. A sender without the field asks for

@@ -502,6 +502,9 @@
       <field type="uint32_t" name="rec_seconds" units="s">Duration of the recording in progress (0 when not recording).</field>
       <field type="float" name="rec_size_mb" units="MiB">Size of the recording in progress, all its files.</field>
       <field type="uint8_t" name="rec_trigger" enum="ARRC_REC_TRIGGER">What started the recording in progress.</field>
+      <field type="float" name="peak_dbfs" units="dB">Highest RX sample envelope since the previous status, any RX channel, in dBFS after the RX FIR (the level the NEAR_CLIP and SATURATED flags test). Exact within 15 dB of near_clip_dbfs; below that the highest I or Q sample, up to 3 dB under the envelope. NaN when not receiving.</field>
+      <field type="float" name="near_clip_dbfs" units="dB">Envelope level that sets NEAR_CLIP with the RX FIR in use (-9 dBFS on DEC1, -4.75 on DEC2). NaN when not receiving.</field>
+      <field type="float" name="clip_dbfs" units="dB">Envelope level that sets SATURATED with the RX FIR in use (-5 dBFS on DEC1, -0.75 on DEC2). NaN when not receiving.</field>
     </message>
     <message id="47002" name="ARRC_SDR_CONFIG">
       <description>SDR main configuration. Sent by the GCS with op=SET; echoed by the companion with op=APPLIED. TX shares the frequency, waveform and PRF.</description>
@@ -531,7 +534,7 @@
       <field type="char[16]" name="antenna_rx1">Antenna on RX1 as the operator describes it (metadata, recorded); empty = UNKNOWN.</field>
       <field type="char[16]" name="antenna_rx2">Antenna on RX2 as the operator describes it (metadata, recorded); empty = UNKNOWN.</field>
       <field type="uint8_t[2]" name="rx_pol" enum="ARRC_POLARIZATION">Polarisation of the antenna on RX1 and RX2 (metadata, recorded).</field>
-      <field type="float[2]" name="rx_pad_db" units="dB">Attenuator (pad) at RX1 and RX2 (metadata, recorded; not applied to the reported power). Valid when its rx_setup_flags bit is set.</field>
+      <field type="float[2]" name="rx_pad_db" units="dB">Attenuator (pad) at RX1 and RX2 (recorded). Valid when its rx_setup_flags bit is set; then the companion counts it in the reported power in place of the port profile's external attenuator, so the dBm refer to the antenna connector.</field>
       <field type="float[2]" name="rx_lna_db" units="dB">LNA gain ahead of RX1 and RX2 (metadata, recorded; not applied to the reported power). Valid when its rx_setup_flags bit is set.</field>
       <field type="uint8_t" name="rx_setup_flags" enum="ARRC_RX_SETUP_FLAGS" display="bitmask">Pad and LNA values entered; a clear bit is UNKNOWN (also what a sender without these fields gives).</field>
       <field type="uint8_t" name="rx_fir" enum="ARRC_RX_FIR">RX FIR. Request: DEFAULT = the companion's configured one. Echo: the FIR in use (DEC1 when a TX port has a role, DEC4 below 2.083 MSPS); DEFAULT from a companion without the field. A change restarts the stream.</field>
