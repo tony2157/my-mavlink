@@ -407,6 +407,8 @@
     <enum name="ARRC_DPHASE_OPTIONS" bitmask="true">
       <description>Transmit differential phase sweep options.</description>
       <entry value="1" name="ARRC_DPHASE_OPTIONS_ONE_WAY"><description>Sweep once from -span to +span. Without it the sweep comes back to -span, which cancels a linear drift of the radar power.</description></entry>
+      <entry value="2" name="ARRC_DPHASE_OPTIONS_PROBE_H"><description>The probe's polarization is horizontal at angle 0 (along the AUT y axis). The result is for this orientation (ARRC_DPHASE_FLAGS_PROBE_H).</description></entry>
+      <entry value="4" name="ARRC_DPHASE_OPTIONS_PROBE_V"><description>The probe's polarization is vertical at angle 0: the fit takes the probe angle plus 90 deg. The result is for this orientation (ARRC_DPHASE_FLAGS_PROBE_V). With neither PROBE_H nor PROBE_V the result assumes a horizontal probe and the GCS has to know the orientation.</description></entry>
     </enum>
     <enum name="ARRC_DPHASE_STATE">
       <description>State of the transmit differential phase sweep.</description>
@@ -441,6 +443,8 @@
       <entry value="16" name="ARRC_DPHASE_FLAGS_NEAR_CLIP"><description>An angle averaged readings with ARRC_MEAS_FLAGS_NEAR_CLIP.</description></entry>
       <entry value="32" name="ARRC_DPHASE_FLAGS_PREDICTED"><description>An angle averaged readings with predicted (undetected) pulses.</description></entry>
       <entry value="64" name="ARRC_DPHASE_FLAGS_COMMANDED_ANGLE"><description>An angle had no attitude report from the gimbal: the fit used its commanded angle there instead of the measured one.</description></entry>
+      <entry value="128" name="ARRC_DPHASE_FLAGS_PROBE_H"><description>The run was given a probe that is horizontal at angle 0 (ARRC_DPHASE_OPTIONS_PROBE_H): beta and zdr_tx are for that orientation.</description></entry>
+      <entry value="256" name="ARRC_DPHASE_FLAGS_PROBE_V"><description>The run was given a probe that is vertical at angle 0 (ARRC_DPHASE_OPTIONS_PROBE_V): beta and zdr_tx are for that orientation. With neither flag the result assumes a horizontal probe; for a vertical one beta is 180 - beta and zdr_tx changes sign.</description></entry>
     </enum>
   </enums>
   <messages>
@@ -735,13 +739,13 @@
       <field type="uint8_t" name="flags" enum="ARRC_GIMBAL_FLAGS" display="bitmask">Limits.</field>
       <field type="uint8_t" name="instance">Mount instance.</field>
       <extensions/>
-      <field type="float[4]" name="q_meas">Attitude the gimbal last reported (GIMBAL_DEVICE_ATTITUDE_STATUS q, w x y z), as the gimbal sent it: its yaw is relative to the vehicle heading when gimbal_flags has GIMBAL_DEVICE_FLAGS_YAW_IN_VEHICLE_FRAME, or has neither frame flag nor YAW_LOCK. NaN if no status within 1 s.</field>
+      <field type="float[4]" name="q_meas">Attitude the gimbal last reported (GIMBAL_DEVICE_ATTITUDE_STATUS q, w x y z), as the gimbal sent it: its yaw is from north when gimbal_flags has GIMBAL_DEVICE_FLAGS_YAW_IN_EARTH_FRAME (the autopilot asks for that frame since 2026-11-25), and relative to the vehicle when it has GIMBAL_DEVICE_FLAGS_YAW_IN_VEHICLE_FRAME, or has neither frame flag nor YAW_LOCK. A Gremsy T7 puts its pan joint angle in a vehicle-frame report, which is not the yaw from the vehicle heading once the vehicle is tilted and the payload rolled. NaN if no status within 1 s.</field>
       <field type="uint64_t" name="meas_usec" units="us">Autopilot boot time the autopilot received that status. 0 if none. Repeated values are the same status sent again.</field>
       <field type="uint32_t" name="gimbal_time_ms" units="ms">The status's own time_boot_ms (the gimbal's clock).</field>
       <field type="uint16_t" name="gimbal_flags" enum="GIMBAL_DEVICE_FLAGS" display="bitmask">The status's flags.</field>
     </message>
     <message id="47020" name="ARRC_DPHASE_STATUS">
-      <description>Transmit differential phase sweep (MAV_CMD_ARRC_DPHASE): state, settings and result. Autopilot to GCS, at the interval a link sets with MAV_CMD_SET_MESSAGE_INTERVAL, on each state change to those links, and on request. beta is in the convention H to the left and V up seen from behind the radar looking along the beam; with the opposite polarity of H (or V) it is 180 - beta. Outside the dialect hash (47000-47019): the companion does not use it.</description>
+      <description>Transmit differential phase sweep (MAV_CMD_ARRC_DPHASE): state, settings and result. Autopilot to GCS, at the interval a link sets with MAV_CMD_SET_MESSAGE_INTERVAL, on each state change to those links, and on request. beta is in the convention H to the left and V up seen from behind the radar looking along the beam; with the opposite polarity of H (or V) it is 180 - beta. The result is for the probe orientation given with the command (flags PROBE_H or PROBE_V); with neither flag it assumes a probe that is horizontal at angle 0. Outside the dialect hash (47000-47019): the companion does not use it.</description>
       <field type="uint32_t" name="time_boot_ms" units="ms">Timestamp (time since system boot).</field>
       <field type="float" name="beta" units="deg">Transmit differential phase magnitude abs(beta), 0 to 180 (NaN without a result).</field>
       <field type="float" name="beta_sigma" units="deg">Standard error of beta from the fit residuals (NaN without a result or when clamped).</field>

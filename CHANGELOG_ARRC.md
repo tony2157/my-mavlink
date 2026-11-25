@@ -4,6 +4,18 @@ Dialect commits on `ArduPilot-4.7-ARRC-SDR` that touch `message_definitions/v1.0
 (`git log --oneline origin/ArduPilot-4.7-ARRC..ArduPilot-4.7-ARRC-SDR -- message_definitions/v1.0/arrc.xml`),
 newest first, with the dialect hash after each (see `README_ARRC.md` for the rule).
 
+## 2026-11-24: probe orientation for the transmit differential phase sweep
+
+Enum entries and descriptions only; `crc_extra` and hash unchanged, `0x7EFB3788`. The companion does not use these
+messages and needs no change; my-ardupilot and RFSonde_GUI move together. An autopilot without the option ignores it
+and sets neither flag, which a GCS takes as "the result assumes a horizontal probe".
+
+- `ARRC_DPHASE_OPTIONS_PROBE_H` (2) and `ARRC_DPHASE_OPTIONS_PROBE_V` (4): the probe's polarization at angle 0. For a
+  vertical probe the fit takes the probe angle plus 90 deg, so beta and zdr_tx come out for the probe as mounted.
+- `ARRC_DPHASE_FLAGS_PROBE_H` (128) and `ARRC_DPHASE_FLAGS_PROBE_V` (256): the orientation the result is for.
+- `ARRC_GIMBAL_POINTING.q_meas` (description): the autopilot now asks the gimbal for its earth-frame yaw, so the
+  report carries `GIMBAL_DEVICE_FLAGS_YAW_IN_EARTH_FRAME`; a Gremsy T7's vehicle-frame report holds its pan joint angle.
+
 ## 2026-11-23: RX headroom in the SDR status, pad in the reported power
 
 Extension fields and a description; `crc_extra` and hash unchanged, `0x7EFB3788`. A companion without the fields
