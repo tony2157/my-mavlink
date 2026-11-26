@@ -409,6 +409,8 @@
       <entry value="1" name="ARRC_DPHASE_OPTIONS_ONE_WAY"><description>Sweep once from -span to +span. Without it the sweep comes back to -span, which cancels a linear drift of the radar power.</description></entry>
       <entry value="2" name="ARRC_DPHASE_OPTIONS_PROBE_H"><description>The probe's polarization is horizontal at angle 0 (along the AUT y axis). The result is for this orientation (ARRC_DPHASE_FLAGS_PROBE_H).</description></entry>
       <entry value="4" name="ARRC_DPHASE_OPTIONS_PROBE_V"><description>The probe's polarization is vertical at angle 0: the fit takes the probe angle plus 90 deg. The result is for this orientation (ARRC_DPHASE_FLAGS_PROBE_V). With neither PROBE_H nor PROBE_V the result assumes a horizontal probe and the GCS has to know the orientation.</description></entry>
+      <entry value="8" name="ARRC_DPHASE_OPTIONS_FIT_3TERM"><description>Fit the three terms only, P = D + A sin(2 psi) + B cos(2 psi), by ordinary least squares on the power. Without this option and ARRC_DPHASE_OPTIONS_FIT_4PSI the autopilot's parameter USR_TXDIFFX_OPT chooses the fit.</description></entry>
+      <entry value="16" name="ARRC_DPHASE_OPTIONS_FIT_4PSI"><description>Fit the three terms plus sin(4 psi) and cos(4 psi), by least squares on the relative power error. The extra terms take up a response of the installed probe that changes with its roll; beta and zdr_tx still come from the first three terms. A sweep narrower than +-45 deg or with fewer than 7 angles is fitted with three terms (ARRC_DPHASE_FLAGS_FIT_4PSI not set).</description></entry>
     </enum>
     <enum name="ARRC_DPHASE_STATE">
       <description>State of the transmit differential phase sweep.</description>
@@ -445,6 +447,7 @@
       <entry value="64" name="ARRC_DPHASE_FLAGS_COMMANDED_ANGLE"><description>An angle had no attitude report from the gimbal: the fit used its commanded angle there instead of the measured one.</description></entry>
       <entry value="128" name="ARRC_DPHASE_FLAGS_PROBE_H"><description>The run was given a probe that is horizontal at angle 0 (ARRC_DPHASE_OPTIONS_PROBE_H): beta and zdr_tx are for that orientation.</description></entry>
       <entry value="256" name="ARRC_DPHASE_FLAGS_PROBE_V"><description>The run was given a probe that is vertical at angle 0 (ARRC_DPHASE_OPTIONS_PROBE_V): beta and zdr_tx are for that orientation. With neither flag the result assumes a horizontal probe; for a vertical one beta is 180 - beta and zdr_tx changes sign.</description></entry>
+      <entry value="512" name="ARRC_DPHASE_FLAGS_FIT_4PSI"><description>The result is from the fit with the sin(4 psi) and cos(4 psi) terms (ARRC_DPHASE_OPTIONS_FIT_4PSI or USR_TXDIFFX_OPT). Not set: the three-term fit.</description></entry>
     </enum>
   </enums>
   <messages>

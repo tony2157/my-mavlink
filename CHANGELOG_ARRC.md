@@ -4,6 +4,18 @@ Dialect commits on `ArduPilot-4.7-ARRC-SDR` that touch `message_definitions/v1.0
 (`git log --oneline origin/ArduPilot-4.7-ARRC..ArduPilot-4.7-ARRC-SDR -- message_definitions/v1.0/arrc.xml`),
 newest first, with the dialect hash after each (see `README_ARRC.md` for the rule).
 
+## 2026-11-26: fit choice for the transmit differential phase sweep
+
+Enum entries only; `crc_extra` and hash unchanged, `0x7EFB3788`. The companion does not use these messages and needs
+no change. An autopilot without the options ignores them, fits three terms and does not set the flag; a GCS takes the
+missing flag as "three-term fit". That autopilot also takes at most +-55 deg (now 60).
+
+- `ARRC_DPHASE_OPTIONS_FIT_3TERM` (8) and `ARRC_DPHASE_OPTIONS_FIT_4PSI` (16): the fit of the run. With neither the
+  autopilot's `USR_TXDIFFX_OPT` chooses (0: with the 4 psi terms, the default; 1: three terms). Both together are
+  refused.
+- `ARRC_DPHASE_FLAGS_FIT_4PSI` (512): the result is from the fit with the sin(4 psi) and cos(4 psi) terms. A sweep
+  narrower than +-45 deg or with fewer than 7 angles is fitted with three terms and the flag stays clear.
+
 ## 2026-11-24: probe orientation for the transmit differential phase sweep
 
 Enum entries and descriptions only; `crc_extra` and hash unchanged, `0x7EFB3788`. The companion does not use these
